@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도쿄 3박4일 가족여행 🗼</title>
+<style>
+  :root{
+    --primary:#e0245e;
+    --primary-dark:#b81b4b;
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --text:#222;
+    --muted:#666;
+    --accent:#1d9bf0;
+    --beer:#f5b301;
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    background:linear-gradient(135deg,#e0245e 0%,#ff6a3d 60%,#ffb347 100%);
+    color:#fff;padding:48px 20px 40px;text-align:center;position:relative;overflow:hidden;
+  }
+  header::after{content:"🗼🎮🍺🛍️🤖";position:absolute;font-size:120px;opacity:.08;
+    bottom:-30px;right:-10px;letter-spacing:10px;white-space:nowrap;}
+  header h1{font-size:2.1rem;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+  header p.sub{font-size:1.05rem;opacity:.95}
+  header p.dates{margin-top:10px;font-size:.9rem;opacity:.85;
+    background:rgba(255,255,255,.18);display:inline-block;padding:4px 14px;border-radius:20px}
+
+  .wrap{max-width:860px;margin:0 auto;padding:20px}
+
+  .family{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:-24px auto 8px;
+    max-width:860px;padding:0 20px;position:relative;z-index:2}
+  .member{background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    padding:12px 16px;flex:1 1 180px;min-width:160px}
+  .member b{display:block;font-size:.98rem;margin-bottom:2px}
+  .member span{font-size:.82rem;color:var(--muted);display:block}
+  .member .emoji{font-size:1.4rem}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:24px 0 18px}
+  .tab{background:var(--card);border:2px solid transparent;border-radius:30px;
+    padding:10px 18px;cursor:pointer;font-weight:700;font-size:.92rem;box-shadow:var(--shadow);
+    transition:.15s;color:var(--muted)}
+  .tab small{display:block;font-weight:500;font-size:.72rem;opacity:.8}
+  .tab.active{background:var(--primary);color:#fff;transform:translateY(-2px)}
+  .tab:hover{border-color:var(--primary)}
+
+  .day{display:none;animation:fade .35s ease}
+  .day.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .day-head{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    padding:18px 22px;margin-bottom:18px}
+  .day-head h2{font-size:1.35rem;color:var(--primary-dark)}
+  .day-head .route{margin-top:8px;font-size:.88rem;color:var(--muted)}
+  .day-head .route b{color:var(--accent)}
+
+  .timeline{position:relative;padding-left:26px}
+  .timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:3px;
+    background:linear-gradient(var(--primary),#ffb347);border-radius:3px}
+  .stop{position:relative;background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    padding:16px 18px;margin-bottom:16px}
+  .stop::before{content:"";position:absolute;left:-22px;top:22px;width:14px;height:14px;
+    border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 0 0 2px var(--primary)}
+  .stop .time{font-size:.78rem;font-weight:700;color:var(--primary);letter-spacing:.5px}
+  .stop h3{font-size:1.12rem;margin:2px 0 6px}
+  .stop p{font-size:.9rem;color:#444;margin-bottom:8px}
+  .stop .move{font-size:.78rem;color:var(--muted);background:#f0f2f7;border-radius:8px;
+    padding:4px 10px;display:inline-block;margin-top:4px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .tag{font-size:.72rem;padding:3px 9px;border-radius:20px;font-weight:700;color:#fff}
+  .t-dad{background:#1d9bf0}.t-mom{background:#e0245e}.t-kids{background:#17bf63}
+  .t-all{background:#794bc4}.t-beer{background:var(--beer);color:#5a4500}.t-food{background:#ff6a3d}
+
+  .tip{background:#fff8e6;border-left:4px solid var(--beer);border-radius:8px;
+    padding:8px 12px;font-size:.82rem;color:#6b5500;margin-top:8px}
+  .tip b{color:#a07a00}
+
+  footer{text-align:center;padding:30px 20px 50px;color:var(--muted);font-size:.82rem}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 24px}
+  .note{background:#eef6ff;border:1px solid #cfe4fb;border-radius:12px;padding:14px 18px;
+    font-size:.85rem;color:#234;margin-bottom:20px}
+  .note b{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗼 도쿄 3박4일 가족여행</h1>
+  <p class="sub">게임 · 애니 · 피규어 · 쇼핑 · 맛집 · 맥주까지 한 번에!</p>
+  <p class="dates">동선 최적화 맞춤 일정 v1</p>
+</header>
+
+<div class="family">
+  <div class="member"><span class="emoji">👨</span><b>아빠 (40대)</b><span>애니·피규어·로봇·맥주 🍺</span></div>
+  <div class="member"><span class="emoji">👩</span><b>엄마 (40대)</b><span>백화점 쇼핑·한국인 맛집 🛍️</span></div>
+  <div class="member"><span class="emoji">🧑</span><b>큰아들 (중학생)</b><span>게임·일본 애니 🎮</span></div>
+  <div class="member"><span class="emoji">👦</span><b>작은아들 (초6)</b><span>게임·일본 애니 🎮</span></div>
+</div>
+
+<div class="wrap">
+  <div class="note">
+    💡 <b>일정 짜는 기준</b> — 하루를 한 지역으로 묶어 <b>이동을 최소화</b>했어요.
+    아빠·아이들이 좋아하는 애니/피규어/로봇 스팟, 엄마의 백화점 쇼핑, 한국인이 좋아하는 맛집,
+    그리고 저녁마다 맥주 한 잔 즐길 곳을 골고루 배치했습니다.
+    (도착·출발 시간, 호텔 위치, 예산이 정해지면 더 정밀하게 조정해 드려요!)
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="show(0,this)">1일차<small>신주쿠</small></div>
+    <div class="tab" onclick="show(1,this)">2일차<small>아키하바라·우에노</small></div>
+    <div class="tab" onclick="show(2,this)">3일차<small>오다이바·도요스</small></div>
+    <div class="tab" onclick="show(3,this)">4일차<small>시부야</small></div>
+  </div>
+
+  <div class="legend">
+    <span class="tag t-dad">아빠</span>
+    <span class="tag t-mom">엄마</span>
+    <span class="tag t-kids">아이들</span>
+    <span class="tag t-all">온가족</span>
+    <span class="tag t-food">맛집</span>
+    <span class="tag t-beer">맥주</span>
+  </div>
+
+  <!-- DAY 1 -->
+  <section class="day active">
+    <div class="day-head">
+      <h2>1일차 · 신주쿠 도심 적응 & 쇼핑</h2>
+      <div class="route">🚶 동선: <b>도착 → 호텔(신주쿠) → 신주쿠 도보 관광</b> · 첫날은 가까운 신주쿠에서 가볍게!</div>
+    </div>
+    <div class="timeline">
+      <div class="stop">
+        <div class="time">오후 · 도착 후</div>
+        <h3>🏨 신주쿠 호텔 체크인 & 짐 풀기</h3>
+        <p>공항(나리타/하네다)에서 신주쿠로 이동 후 짐 정리. 신주쿠는 교통 중심지라 4일 내내 이동이 편해요.</p>
+        <div class="tags"><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오후</div>
+        <h3>🛍️ 이세탄 · 루미네 백화점 / 신주쿠 거리</h3>
+        <p>엄마가 좋아하는 백화점 쇼핑 코스. 이세탄 본점은 도쿄 대표 백화점이고, 지하 식품관(데파치카)도 구경거리.</p>
+        <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">늦은 오후</div>
+        <h3>🦖 가부키초 · 고질라 헤드 & 게임센터</h3>
+        <p>신주쿠 도호빌딩 위 거대 고질라 머리(포토존)! 근처 타이토·세가 게임센터에서 아이들과 인형뽑기·아케이드 게임.</p>
+        <div class="move">🚶 도보 5~10분</div>
+        <div class="tags"><span class="tag t-kids">아이들</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">저녁</div>
+        <h3>🍺 오모이데요코초 (추억의 골목) · 이자카야</h3>
+        <p>좁은 골목에 야키토리(닭꼬치)집이 줄지은 레트로 분위기. 아빠는 생맥주 + 꼬치, 가족은 일본 분위기 만끽.</p>
+        <div class="tip"><b>대안 맛집</b> — 한국인 인기 라멘 <b>이치란/후운지</b>, 돈카츠 <b>마이센</b>도 신주쿠 근처!</div>
+        <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAY 2 -->
+  <section class="day">
+    <div class="day-head">
+      <h2>2일차 · 아키하바라(덕후 천국) → 우에노</h2>
+      <div class="route">🚶 동선: <b>아키하바라 → (한 정거장) → 우에노</b> · 애니·피규어·게임의 성지 완전정복!</div>
+    </div>
+    <div class="timeline">
+      <div class="stop">
+        <div class="time">오전</div>
+        <h3>🤖 아키하바라 전자상가 & 피규어 쇼핑</h3>
+        <p><b>코토부키야·만다라케·아미아미</b>에서 피규어/프라모델, <b>라디오회관</b>은 건물 전체가 피규어 백화점!
+        아빠와 아이들 모두 신나는 곳.</p>
+        <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오전~점심</div>
+        <h3>🎮 게임센터 & 건담 베이스 / 건담 카페</h3>
+        <p>세가·타이토 게임센터에서 최신 아케이드, 마리오카트 거리 체험. 건담 프라모델·로봇 굿즈 매장도!</p>
+        <div class="move">🚶 모두 도보권</div>
+        <div class="tags"><span class="tag t-kids">아이들</span><span class="tag t-dad">아빠</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">점심</div>
+        <h3>🍜 아키하바라 맛집 (라멘 / 마구로동)</h3>
+        <p>한국인에게 유명한 <b>킷사 유 오므라이스</b>, 회전초밥, 라멘 등 선택지 풍부.</p>
+        <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오후</div>
+        <h3>🐼 우에노 공원 & 아메요코 시장</h3>
+        <p>아키하바라에서 JR/지하철 한두 정거장. 우에노 공원 산책 후 <b>아메요코 시장</b>에서 길거리 먹거리·쇼핑.</p>
+        <div class="move">🚇 JR 야마노테선 4분</div>
+        <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-mom">엄마</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">저녁</div>
+        <h3>🍺 아메요코 골목 이자카야 · 입식 맥주집</h3>
+        <p>활기찬 시장 골목에서 해산물 안주에 시원한 생맥주. 가성비 좋고 한국인에게도 인기.</p>
+        <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAY 3 -->
+  <section class="day">
+    <div class="day-head">
+      <h2>3일차 · 오다이바 & 도요스 (로봇 + 체험)</h2>
+      <div class="route">🚶 동선: <b>도요스(teamLab) → 오다이바(건담)</b> · 바닷가 미래도시에서 하루!</div>
+    </div>
+    <div class="timeline">
+      <div class="stop">
+        <div class="time">오전</div>
+        <h3>🌊 teamLab Planets (도요스)</h3>
+        <p>물에 들어가 빛·꽃에 둘러싸이는 몰입형 디지털 아트. 아이들·온가족 모두 인생샷! <b>온라인 사전예약 필수</b>.</p>
+        <div class="tip"><b>예약 팁</b> — 인기 시간대는 매진. 출발 전 날짜·시간 정해지면 예약 도와드릴게요.</div>
+        <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-kids">아이들</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">점심</div>
+        <h3>🍱 다이버시티 / 아쿠아시티 푸드코트</h3>
+        <p>오다이바 이동 후 쇼핑몰에서 점심. 라멘·돈부리·패밀리 레스토랑 등 아이들 입맛 맞추기 좋음.</p>
+        <div class="move">🚇 유리카모메/버스 이동</div>
+        <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오후</div>
+        <h3>🤖 실물대 유니콘 건담 & 건담 베이스 도쿄</h3>
+        <p>다이버시티 앞 <b>19.7m 실물대 유니콘 건담</b> — 아빠 인생 버킷리스트! 변신 연출도 시간대별 진행.
+        건물 안 <b>건담 베이스</b>는 프라모델 천국.</p>
+        <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">늦은 오후</div>
+        <h3>🛍️ 다이버시티·아쿠아시티 쇼핑 & 레인보우브릿지 야경</h3>
+        <p>엄마 쇼핑 시간. 해 질 무렵 자유의 여신상 + 레인보우브릿지 야경 포토존.</p>
+        <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">저녁</div>
+        <h3>🍺 오다이바 뷰 레스토랑 / 복귀 후 신주쿠 한잔</h3>
+        <p>야경 보며 저녁, 또는 신주쿠 복귀 후 크래프트 맥주 펍에서 마무리.</p>
+        <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAY 4 -->
+  <section class="day">
+    <div class="day-head">
+      <h2>4일차 · 시부야 (게임·애니 굿즈 + 쇼핑) → 출발</h2>
+      <div class="route">🚶 동선: <b>시부야 한 곳에서 압축 관광</b> · 마지막날 쇼핑 후 공항으로!</div>
+    </div>
+    <div class="timeline">
+      <div class="stop">
+        <div class="time">오전</div>
+        <h3>🌆 시부야 스카이 & 스크램블 교차로 · 하치코</h3>
+        <p>전망대에서 도쿄 파노라마, 세계적으로 유명한 스크램블 교차로 횡단, 충견 하치코 동상 인증샷.</p>
+        <div class="tags"><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오전~점심</div>
+        <h3>🎮 시부야 파르코 — 닌텐도·포켓몬·점프샵·캡콤</h3>
+        <p>한 건물에 <b>닌텐도 도쿄</b>, <b>포켓몬센터 시부야</b>, <b>점프샵</b>, <b>캡콤 스토어</b>가 모여 있어
+        게임·애니 좋아하는 아이들에게 최고! 아빠도 굿즈 득템.</p>
+        <div class="move">🚶 하치코에서 도보 5분</div>
+        <div class="tags"><span class="tag t-kids">아이들</span><span class="tag t-dad">아빠</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">점심</div>
+        <h3>🍛 시부야 인기 맛집 (한국인 PICK)</h3>
+        <p>함박스테이크 <b>키친 minokichi</b>, 라멘, 카레 등. 마지막 식사는 든든하게.</p>
+        <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="stop">
+        <div class="time">오후</div>
+        <h3>🛍️ 시부야 109 · 마지막 쇼핑 후 공항행</h3>
+        <p>엄마의 마지막 쇼핑 찬스, 기념품 정리 후 호텔에서 짐 찾아 공항으로 이동.</p>
+        <div class="tip"><b>출발 팁</b> — 출국 시간 알려주시면 공항 도착 역산해서 마무리 일정 조정해 드릴게요.</div>
+        <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  🗼 도쿄 가족여행 일정 v1 — 정보 주시는 대로 계속 업데이트됩니다 ✨
+</footer>
+
+<script>
+  function show(i, el){
+    document.querySelectorAll('.day').forEach((d,idx)=>d.classList.toggle('active',idx===i));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
