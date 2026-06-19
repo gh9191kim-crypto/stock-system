@@ -667,8 +667,8 @@
     if(typeof L === 'undefined') return;
     if(!dmap){
       dmap = L.map('dayMap', {scrollWheelZoom:false});
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png',
-        {maxZoom:20, attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(dmap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {maxZoom:19, subdomains:'abc', attribution:'&copy; OpenStreetMap'}).addTo(dmap);
       dlayer = L.layerGroup().addTo(dmap);
     }
     dlayer.clearLayers();
