@@ -91,6 +91,12 @@
     box-shadow:0 2px 8px rgba(224,36,94,.25)}
   .resv.tl{background:#16a34a;box-shadow:0 2px 8px rgba(22,163,74,.25)}
   .resv-note{font-size:.76rem;color:#b81b4b;font-weight:700;margin-top:6px}
+  /* 스팟 간 이동(지하철/도보) 연결선 */
+  .hop{display:flex;align-items:flex-start;gap:7px;font-size:.8rem;font-weight:700;color:#0a4d8c;
+    background:#eef5ff;border:1px dashed #b9d4f3;border-radius:9px;padding:7px 12px;margin:-4px 0 14px 2px}
+  .hop .ic{font-size:.95rem;line-height:1.3}
+  .hop b{color:#b81b4b}
+  .hop .x{color:#0a66c2}
   /* 평점 배지 */
   .scores{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 2px}
   .score{font-size:.77rem;font-weight:800;padding:3px 10px;border-radius:8px;white-space:nowrap}
@@ -235,6 +241,7 @@
         <div class="move">🚶 호텔 도보 5~10분</div>
         <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>이루카 도쿄 → 도쿄 미드타운 · <b>도보 약 5분</b></span></div>
       <div class="stop">
         <div class="time">15:30</div>
         <h3>🛍️ 도쿄 미드타운 & 롯폰기 힐스</h3>
@@ -244,23 +251,11 @@
         </div>
         <div class="highlights"><b>볼거리</b> · 모리미술관·시티뷰 전망대 · 모리정원 산책 · 명품/잡화 쇼핑 · 계절 일루미네이션</div>
         <p>호텔 근처 고급 쇼핑몰. 엄마 쇼핑, 모리 정원 산책, 전망 카페. 아이들·아빠는 잠깐 휴식.</p>
-        <div class="move">🚶 호텔 도보 5~10분</div>
         <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
       </div>
-      <div class="stop">
-        <div class="time">17:30</div>
-        <h3>🗼 도쿄타워 (야경) — 가고 싶다 하신 곳!</h3>
-        <div class="spot">
-          <img loading="lazy" alt="도쿄타워" src="https://commons.wikimedia.org/wiki/Special:FilePath/Tokyo_Tower_and_around_Skyscrapers.jpg?width=480" onerror="this.closest('.spot').style.display='none'">
-          <div class="spot-cap">📸 도쿄타워 (333m)</div>
-        </div>
-        <div class="highlights"><b>볼거리</b> · 메인덱(150m)·탑덱(250m) 전망 · 발밑 유리바닥 · 야경/라이트업 · 1층 풋타운 기념품</div>
-        <p>롯폰기에서 가장 가까운 랜드마크. 해 질 무렵 전망대 + 빨갛게 빛나는 도쿄타워 인증샷. 가족 필수 코스!</p>
-        <div class="move">🚇 도보 15분 / 오에도선 1정거장(아카바네바시)</div>
-        <div class="tags"><span class="tag t-all">온가족</span></div>
-      </div>
+      <div class="hop"><span class="ic">🚶</span><span>롯폰기 힐스 → 곤파치(니시아자부) · <b>도보 약 8분</b></span></div>
       <div class="stop meal">
-        <div class="time">19:00 · 저녁</div>
+        <div class="time">17:45 · 저녁</div>
         <h3>🍺 곤파치 니시아자부 (権八) · 이자카야 + 생맥주</h3>
         <div class="dish">
           <img loading="lazy" alt="야키토리 닭꼬치" src="https://commons.wikimedia.org/wiki/Special:FilePath/Yakitori_stand_2006_(121752794).jpg?width=480" onerror="this.closest('.dish').style.display='none'">
@@ -280,6 +275,19 @@
         <a class="resv" target="_blank" href="https://gonpachi.jp/nishi-azabu/">📅 곤파치 예약 (공식)</a>
         <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>곤파치 → 도쿄타워 · <b>도보 18분 / 🚕 택시 7분</b> <span class="x">(또는 오에도선 롯폰기→아카바네바시 1정거장)</span></span></div>
+      <div class="stop">
+        <div class="time">19:30 · 야경</div>
+        <h3>🗼 도쿄타워 (야경) — 가고 싶다 하신 곳!</h3>
+        <div class="spot">
+          <img loading="lazy" alt="도쿄타워" src="https://commons.wikimedia.org/wiki/Special:FilePath/Tokyo_Tower_and_around_Skyscrapers.jpg?width=480" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 도쿄타워 (333m)</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 메인덱(150m)·탑덱(250m) 전망 · 발밑 유리바닥 · 야경/라이트업 · 1층 풋타운 기념품</div>
+        <p>롯폰기에서 가장 가까운 랜드마크. 깜깜해진 뒤 빨갛게 빛나는 도쿄타워 + 전망대 야경으로 하루 마무리! 가족 필수 코스.</p>
+        <div class="tags"><span class="tag t-all">온가족</span></div>
+      </div>
+      <div class="hop"><span class="ic">🚇</span><span>도쿄타워 → 호텔 · <b>오에도선 아카바네바시→롯폰기 1정거장 + 도보, 약 10분</b></span></div>
     </div>
   </section>
 
@@ -294,7 +302,7 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 아키하바라</h3>
         <p>히비야선 한 번에 직통이라 편해요.</p>
-        <span class="traintime">🚇 히비야선 직통 약 20분</span>
+        <span class="traintime">🚇 히비야선 <b>직통</b> 약 20분 · 환승 없음 (롯폰기→아키하바라)</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -308,13 +316,14 @@
         <p><b>코토부키야·만다라케·아미아미</b> 피규어/프라모델, <b>라디오회관</b>은 건물 전체가 피규어 백화점!</p>
         <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>아키하바라 내 이동 · <b>도보 약 3분</b></span></div>
       <div class="stop">
         <div class="time">11:00</div>
         <h3>🎮 게임센터 & 건담 베이스 / 건담 카페</h3>
         <p>세가·타이토 게임센터에서 아케이드·인형뽑기, 건담 프라모델·로봇 굿즈 매장.</p>
-        <div class="move">🚶 모두 도보권</div>
         <div class="tags"><span class="tag t-kids">아이들</span><span class="tag t-dad">아빠</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>게임센터 → 큐슈 장가라 · <b>도보 약 5분</b> (아키하바라 내)</span></div>
       <div class="stop meal">
         <div class="time">12:30 · 점심</div>
         <h3>🍜 큐슈 장가라 라멘 (九州じゃんがら) 아키하바라 본점</h3>
@@ -337,7 +346,7 @@
         <div class="time">14:00</div>
         <h3>🚇 아키하바라 → 우에노</h3>
         <p>히비야선/JR로 금방. 바로 옆 동네.</p>
-        <span class="traintime">🚇 약 5분</span>
+        <span class="traintime">🚇 히비야선 2정거장 약 4분 (또는 JR 야마노테선 4분) · 환승 없음</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -351,6 +360,7 @@
         <p>공원 산책 후 <b>아메요코 시장</b>에서 길거리 먹거리·쇼핑. 활기찬 시장 구경.</p>
         <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-mom">엄마</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>아메요코 → 이소마루 수산 · <b>도보 약 3분</b> (시장 안)</span></div>
       <div class="stop meal">
         <div class="time">18:00 · 저녁</div>
         <h3>🍺 이소마루 수산 (磯丸水産) 우에노 · 해산물 이자카야</h3>
@@ -387,7 +397,7 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 도요스</h3>
         <p>오에도선 + 유라쿠초선 환승.</p>
-        <span class="traintime">🚇 약 30분</span>
+        <span class="traintime">🚇 오에도선 롯폰기→츠키시마 → (환승) 유라쿠초선 츠키시마→도요스 · 약 25분 · 환승 1회</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -399,6 +409,7 @@
         <a class="resv tl" target="_blank" href="https://planets.teamlab.art/tokyo/">🎫 teamLab 티켓 예약 (공식)</a>
         <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-kids">아이들</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>teamLab → 라라포트 도요스 · <b>도보 약 7분</b></span></div>
       <div class="stop meal">
         <div class="time">12:00 · 점심</div>
         <h3>🍱 라라포트 도요스 (LaLaport 豊洲) 레스토랑가</h3>
@@ -421,7 +432,7 @@
         <div class="time">13:30</div>
         <h3>🚝 도요스 → 오다이바</h3>
         <p>유리카모메(모노레일)로 바다 위를 달려요.</p>
-        <span class="traintime">🚝 유리카모메 약 15분</span>
+        <span class="traintime">🚝 유리카모메 직통 약 18분 · 환승 없음 (도요스→다이바)</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -435,6 +446,7 @@
         <p>다이버시티 앞 <b>19.7m 실물대 유니콘 건담</b> — 아빠 버킷리스트! 시간대별 변신 연출도. 안쪽 <b>건담 베이스</b>는 프라모델 천국.</p>
         <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>유니콘 건담(다이버시티) → 아쿠아시티 · <b>도보 약 5분</b></span></div>
       <div class="stop">
         <div class="time">16:00</div>
         <h3>🛍️ 다이버시티·아쿠아시티 쇼핑 & 야경</h3>
@@ -446,6 +458,7 @@
         <p>엄마 쇼핑 시간. 해 질 무렵 자유의 여신상 + 레인보우브릿지 야경 포토존.</p>
         <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>아쿠아시티 내 이동 · <b>도보 약 2분</b></span></div>
       <div class="stop meal">
         <div class="time">18:30 · 저녁</div>
         <h3>🍺 도쿄 라멘 국기관 마이 (아쿠아시티 오다이바 5F)</h3>
@@ -462,7 +475,7 @@
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=오다이바 라멘 국기관 아쿠아시티 후기">📝 네이버 후기</a>
           <a class="t" target="_blank" href="https://www.aquacity.jp/trk_mai/">🍴 매장 안내</a>
         </div>
-        <div class="move">🚇 저녁 후 롯폰기 복귀 약 40분</div>
+        <div class="move">🚇 저녁 후 롯폰기 복귀 · 유리카모메 다이바→시오도메 → (환승) 오에도선 시오도메→롯폰기 · 약 28분 · 환승 1회</div>
         <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
     </div>
@@ -485,7 +498,7 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 신주쿠</h3>
         <p>오에도선 한 번에 직통. 환승 없이 편해요.</p>
-        <span class="traintime">🚇 오에도선 직통 약 10분</span>
+        <span class="traintime">🚇 오에도선 <b>직통</b> 약 10분 · 환승 없음 (롯폰기→신주쿠)</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -511,6 +524,7 @@
         </div>
         <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
       </div>
+      <div class="hop"><span class="ic">🚶</span><span>이세탄 → 츠나하치 · <b>도보 약 3~5분</b></span></div>
       <div class="stop meal">
         <div class="time">11:30 · 점심 (백화점 근처)</div>
         <h3>🍤 텐푸라 신주쿠 츠나하치 (つな八) 총본점</h3>
