@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>도쿄 3박4일 가족여행 🗼 (2026.7.28~7.31)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --primary:#e0245e;--primary-dark:#b81b4b;--bg:#f4f6fb;--card:#ffffff;
@@ -111,6 +113,15 @@
   .daymap iframe{width:100%;height:100%;border:0;display:block}
   .mapbtn{display:inline-flex;align-items:center;gap:6px;margin-top:11px;text-decoration:none;
     background:#1a73e8;color:#fff;font-weight:800;font-size:.83rem;border-radius:10px;padding:9px 15px}
+  /* 지도 위 번호 마커 / 장소 라벨 / 거리 배지 */
+  .numicon{background:#e0245e;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:.85rem;
+    border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+  .leaflet-tooltip.maplabel{background:rgba(255,255,255,.94);border:1.5px solid #e0245e;border-radius:7px;
+    font-size:.74rem;font-weight:800;color:#b81b4b;padding:1px 7px;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap}
+  .leaflet-tooltip.maplabel::before{display:none}
+  .kmbadge{background:#1a73e8;color:#fff;font-size:.72rem;font-weight:800;border-radius:11px;
+    padding:1px 7px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35);text-align:center}
   /* 평점 배지 */
   .scores{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 2px}
   .score{font-size:.77rem;font-weight:800;padding:3px 10px;border-radius:8px;white-space:nowrap}
@@ -592,7 +603,7 @@
   <div class="mapwrap">
     <h4 id="mapTitle">🗺️ 이동 동선 지도 (구글지도)</h4>
     <div class="maproute" id="mapRoute"></div>
-    <div class="daymap"><iframe id="dayMapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src=""></iframe></div>
+    <div id="dayMap" class="daymap"></div>
     <a class="mapbtn" id="mapOpen" target="_blank" href="#">🗺️ 구글지도 앱에서 길찾기 열기 (한국어)</a>
     <div class="maplegend" style="font-size:.78rem;color:#666;margin-top:8px">위 탭(1·2·3·4일차)을 누르면 그날 동선 지도로 바뀝니다 · 숫자=방문 순서 · 거리는 대략치</div>
   </div>
@@ -604,34 +615,79 @@
 </footer>
 
 <script>
-  // 날짜별 이동 동선 (구글지도 한국어 · 방문 순서 · 구간 거리 km)
+  // 날짜별 이동 동선: 번호·장소명·구간 거리(km)를 지도 위에 직접 표시
   const MAPDATA = [
-    { title:'1일차 이동 동선 (구글지도)',
-      steps:[['1','호텔'],['2','이루카 도쿄 · 점심',0.2],['3','미드타운·롯폰기힐스 · 쇼핑',0.3],['4','곤파치 · 저녁',0.7],['5','도쿄타워 · 야경',2.0]],
-      embed:'https://maps.google.com/maps?saddr=35.6635,139.7320&daddr=35.6620,139.7305+to:35.6605,139.7295+to:35.6586,139.7237+to:35.6586,139.7454&hl=ko&output=embed',
-      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6635,139.7320&destination=35.6586,139.7454&waypoints=35.6620,139.7305%7C35.6605,139.7295%7C35.6586,139.7237&travelmode=transit&hl=ko' },
-    { title:'2일차 이동 동선 (구글지도)',
-      steps:[['1','롯폰기'],['2','아키하바라 · 피규어/게임/점심',6],['3','우에노·아메요코',1.3],['4','이소마루 수산 · 저녁',0.2]],
-      embed:'https://maps.google.com/maps?saddr=35.6628,139.7315&daddr=35.6984,139.7731+to:35.7088,139.7745+to:35.7080,139.7762&hl=ko&output=embed',
-      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.7080,139.7762&waypoints=35.6984,139.7731%7C35.7088,139.7745&travelmode=transit&hl=ko' },
-    { title:'3일차 이동 동선 (구글지도)',
-      steps:[['1','롯폰기'],['2','teamLab(도요스)',6],['3','라라포트 · 점심',0.8],['4','유니콘 건담',4],['5','아쿠아시티 · 저녁',0.5]],
-      embed:'https://maps.google.com/maps?saddr=35.6628,139.7315&daddr=35.6493,139.7902+to:35.6552,139.7950+to:35.6256,139.7745+to:35.6295,139.7735&hl=ko&output=embed',
-      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.6295,139.7735&waypoints=35.6493,139.7902%7C35.6552,139.7950%7C35.6256,139.7745&travelmode=transit&hl=ko' },
-    { title:'4일차 이동 동선 (구글지도)',
-      steps:[['1','롯폰기'],['2','신주쿠 이세탄 · 쇼핑',4],['3','츠나하치 · 점심',0.3],['✈️','나리타 공항 (N’EX)',65]],
-      embed:'https://maps.google.com/maps?saddr=35.6628,139.7315&daddr=35.6917,139.7045+to:35.6912,139.7037&hl=ko&output=embed',
-      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.6912,139.7037&waypoints=35.6917,139.7045&travelmode=transit&hl=ko' }
+    { title:'1일차 이동 동선',
+      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6635,139.7320&destination=35.6586,139.7454&waypoints=35.6620,139.7305%7C35.6605,139.7295%7C35.6586,139.7237&travelmode=transit&hl=ko',
+      spots:[
+        {num:'1',name:'호텔(롯폰기)',ll:[35.6635,139.7320]},
+        {num:'2',name:'이루카 도쿄 · 점심',km:0.2,ll:[35.6620,139.7305]},
+        {num:'3',name:'미드타운·롯폰기힐스 · 쇼핑',km:0.3,ll:[35.6605,139.7295]},
+        {num:'4',name:'곤파치 · 저녁',km:0.7,ll:[35.6586,139.7237]},
+        {num:'5',name:'도쿄타워 · 야경',km:2.0,ll:[35.6586,139.7454]}
+      ]},
+    { title:'2일차 이동 동선',
+      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.7080,139.7762&waypoints=35.6984,139.7731%7C35.7088,139.7745&travelmode=transit&hl=ko',
+      spots:[
+        {num:'1',name:'롯폰기(출발)',ll:[35.6628,139.7315]},
+        {num:'2',name:'아키하바라 · 피규어/게임/점심',km:6,ll:[35.6984,139.7731]},
+        {num:'3',name:'우에노·아메요코',km:1.3,ll:[35.7088,139.7745]},
+        {num:'4',name:'이소마루 수산 · 저녁',km:0.2,ll:[35.7080,139.7762]}
+      ]},
+    { title:'3일차 이동 동선',
+      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.6295,139.7735&waypoints=35.6493,139.7902%7C35.6552,139.7950%7C35.6256,139.7745&travelmode=transit&hl=ko',
+      spots:[
+        {num:'1',name:'롯폰기(출발)',ll:[35.6628,139.7315]},
+        {num:'2',name:'teamLab(도요스)',km:6,ll:[35.6493,139.7902]},
+        {num:'3',name:'라라포트 · 점심',km:0.8,ll:[35.6552,139.7950]},
+        {num:'4',name:'유니콘 건담',km:4,ll:[35.6256,139.7745]},
+        {num:'5',name:'아쿠아시티 · 저녁',km:0.5,ll:[35.6295,139.7735]}
+      ]},
+    { title:'4일차 이동 동선',
+      dir:'https://www.google.com/maps/dir/?api=1&origin=35.6628,139.7315&destination=35.6912,139.7037&waypoints=35.6917,139.7045&travelmode=transit&hl=ko',
+      tail:{num:'✈️',name:'나리타 공항 (N’EX)',km:65},
+      spots:[
+        {num:'1',name:'롯폰기(출발)',ll:[35.6628,139.7315]},
+        {num:'2',name:'신주쿠 이세탄 · 쇼핑',km:4,ll:[35.6917,139.7045]},
+        {num:'3',name:'츠나하치 · 점심',km:0.3,ll:[35.6912,139.7037]}
+      ]}
   ];
+  let dmap, dlayer;
   function renderMap(i){
     const d = MAPDATA[i];
     document.getElementById('mapTitle').textContent = '🗺️ ' + d.title;
-    document.getElementById('mapRoute').innerHTML = d.steps.map(function(s,idx){
-      var arrow = idx>0 ? '<span class="arr">→ <small>약 '+s[2]+'km</small> →</span>' : '';
-      return arrow + '<span class="step"><span class="num">'+s[0]+'</span>'+s[1]+'</span>';
+    // 경로 텍스트(라벨 + 거리)
+    var html = d.spots.map(function(s,idx){
+      var arrow = idx>0 ? '<span class="arr">→ <small>약 '+s.km+'km</small> →</span>' : '';
+      return arrow + '<span class="step"><span class="num">'+s.num+'</span>'+s.name+'</span>';
     }).join('');
-    document.getElementById('dayMapFrame').src = d.embed;
+    if(d.tail){ html += '<span class="arr">→ <small>약 '+d.tail.km+'km</small> →</span><span class="step"><span class="num">'+d.tail.num+'</span>'+d.tail.name+'</span>'; }
+    document.getElementById('mapRoute').innerHTML = html;
     document.getElementById('mapOpen').href = d.dir;
+    if(typeof L === 'undefined') return;
+    if(!dmap){
+      dmap = L.map('dayMap', {scrollWheelZoom:false});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png',
+        {maxZoom:20, attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(dmap);
+      dlayer = L.layerGroup().addTo(dmap);
+    }
+    dlayer.clearLayers();
+    const pts = d.spots.map(function(s){return s.ll;});
+    L.polyline(pts, {color:'#e0245e', weight:4, opacity:.8, dashArray:'7,7'}).addTo(dlayer);
+    // 구간 거리(km) 배지 — 두 점 중간에 표시
+    for(var k=1;k<d.spots.length;k++){
+      var a=d.spots[k-1].ll, b=d.spots[k].ll;
+      var mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+      var kmIcon=L.divIcon({className:'', html:'<div class="kmbadge">약 '+d.spots[k].km+'km</div>', iconSize:[64,18], iconAnchor:[32,9]});
+      L.marker(mid,{icon:kmIcon, interactive:false}).addTo(dlayer);
+    }
+    // 번호 + 장소명 마커
+    d.spots.forEach(function(s){
+      var icon=L.divIcon({className:'', html:'<div class="numicon">'+s.num+'</div>', iconSize:[28,28], iconAnchor:[14,14]});
+      L.marker(s.ll,{icon:icon}).addTo(dlayer)
+        .bindTooltip(s.num+'. '+s.name, {permanent:true, direction:'right', className:'maplabel', offset:[14,0]});
+    });
+    setTimeout(function(){ dmap.invalidateSize(); dmap.fitBounds(pts,{padding:[45,60]}); }, 130);
   }
   function show(i, el){
     document.querySelectorAll('.day').forEach((d,idx)=>d.classList.toggle('active',idx===i));
