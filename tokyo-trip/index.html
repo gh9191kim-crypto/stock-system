@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>도쿄 3박4일 가족여행 🗼 (2026.7.28~7.31)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --primary:#e0245e;--primary-dark:#b81b4b;--bg:#f4f6fb;--card:#ffffff;
@@ -97,6 +99,13 @@
   .hop .ic{font-size:.95rem;line-height:1.3}
   .hop b{color:#b81b4b}
   .hop .x{color:#0a66c2}
+  /* 그날 이동 동선 지도 */
+  .daymap{height:300px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);
+    margin-bottom:8px;border:1px solid #e3e8f0;z-index:0}
+  .maplegend{font-size:.78rem;color:#666;margin:0 0 18px 2px}
+  .numicon{background:#e0245e;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:.82rem;
+    border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)}
   /* 평점 배지 */
   .scores{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 2px}
   .score{font-size:.77rem;font-weight:800;padding:3px 10px;border-radius:8px;white-space:nowrap}
@@ -181,6 +190,8 @@
       <h2>1일차 · 7/28(화) 도착 → 롯폰기·도쿄타워</h2>
       <div class="route">🚶 동선: <b>나리타 →(스카이라이너→우에노→히비야선) 롯폰기 호텔(체크인·점심) → 미드타운/롯폰기힐스 → 도쿄타워</b></div>
     </div>
+    <div id="map0" class="daymap"></div>
+    <div class="maplegend">🗺️ 숫자 = 방문 순서 · 빨간 점선 = 이동 동선 (지도 확대/이동 가능)</div>
     <div class="timeline">
       <div class="stop travel">
         <div class="time">08:10 ~ 10:40</div>
@@ -297,6 +308,8 @@
       <h2>2일차 · 7/29(수) 아키하바라(덕후 천국) → 우에노</h2>
       <div class="route">🚶 동선: <b>롯폰기 →(히비야선 직통) 아키하바라 → 우에노 → 롯폰기 복귀</b></div>
     </div>
+    <div id="map1" class="daymap"></div>
+    <div class="maplegend">🗺️ 숫자 = 방문 순서 · 빨간 점선 = 이동 동선 (지도 확대/이동 가능)</div>
     <div class="timeline">
       <div class="stop travel">
         <div class="time">09:00</div>
@@ -392,6 +405,8 @@
       <h2>3일차 · 7/30(목) 도요스 teamLab → 오다이바(로봇)</h2>
       <div class="route">🚶 동선: <b>롯폰기 → 도요스(teamLab) → 오다이바(건담) → 롯폰기 복귀</b></div>
     </div>
+    <div id="map2" class="daymap"></div>
+    <div class="maplegend">🗺️ 숫자 = 방문 순서 · 빨간 점선 = 이동 동선 (지도 확대/이동 가능)</div>
     <div class="timeline">
       <div class="stop travel">
         <div class="time">09:00</div>
@@ -487,6 +502,8 @@
       <h2>4일차 · 7/31(금) 신주쿠 이세탄 백화점 → 출발</h2>
       <div class="route">🚶 동선: <b>롯폰기 →(오에도선) 신주쿠 이세탄(불가리·쇼핑·점심) → N'EX 기차로 나리타</b> · 비행기 17:15!</div>
     </div>
+    <div id="map3" class="daymap"></div>
+    <div class="maplegend">🗺️ 숫자 = 방문 순서 · 빨간 점선 = 이동 동선 · ✈️ 이후 N'EX로 나리타 (지도 확대/이동 가능)</div>
     <div class="timeline">
       <div class="stop">
         <div class="time">08:30</div>
@@ -582,12 +599,62 @@
 </footer>
 
 <script>
+  // 그날 이동 동선 (방문 순서대로 좌표)
+  const DAYS = [
+    { spots:[
+      {n:'호텔(롯폰기)', ll:[35.6635,139.7320]},
+      {n:'이루카 도쿄(점심)', ll:[35.6620,139.7305]},
+      {n:'도쿄 미드타운·롯폰기힐스', ll:[35.6605,139.7295]},
+      {n:'곤파치 니시아자부(저녁)', ll:[35.6586,139.7237]},
+      {n:'도쿄타워(야경)', ll:[35.6586,139.7454]}
+    ]},
+    { spots:[
+      {n:'롯폰기(출발)', ll:[35.6628,139.7315]},
+      {n:'아키하바라', ll:[35.6984,139.7731]},
+      {n:'우에노·아메요코', ll:[35.7088,139.7745]},
+      {n:'이소마루 수산(저녁)', ll:[35.7080,139.7762]}
+    ]},
+    { spots:[
+      {n:'롯폰기(출발)', ll:[35.6628,139.7315]},
+      {n:'teamLab Planets(도요스)', ll:[35.6493,139.7902]},
+      {n:'라라포트 도요스(점심)', ll:[35.6552,139.7950]},
+      {n:'유니콘 건담(다이버시티)', ll:[35.6256,139.7745]},
+      {n:'아쿠아시티(쇼핑·저녁)', ll:[35.6295,139.7735]}
+    ]},
+    { spots:[
+      {n:'롯폰기(출발)', ll:[35.6628,139.7315]},
+      {n:'신주쿠 이세탄(쇼핑)', ll:[35.6917,139.7045]},
+      {n:'츠나하치(점심)', ll:[35.6912,139.7037]}
+    ]}
+  ];
+  const maps = {};
+  function initMap(i){
+    if(maps[i] || typeof L === 'undefined') return;
+    const d = DAYS[i];
+    const m = L.map('map'+i, {scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:19, attribution:'&copy; OpenStreetMap'}).addTo(m);
+    const pts = [];
+    d.spots.forEach((s,idx)=>{
+      const icon = L.divIcon({className:'', html:'<div class="numicon">'+(idx+1)+'</div>',
+        iconSize:[26,26], iconAnchor:[13,13]});
+      L.marker(s.ll,{icon}).addTo(m).bindPopup('<b>'+(idx+1)+'.</b> '+s.n);
+      pts.push(s.ll);
+    });
+    L.polyline(pts, {color:'#e0245e', weight:4, opacity:.75, dashArray:'7,7'}).addTo(m);
+    m._pts = pts;
+    m.fitBounds(pts, {padding:[35,35]});
+    maps[i] = m;
+  }
   function show(i, el){
     document.querySelectorAll('.day').forEach((d,idx)=>d.classList.toggle('active',idx===i));
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     el.classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
+    initMap(i);
+    setTimeout(function(){ if(maps[i]){ maps[i].invalidateSize(); maps[i].fitBounds(maps[i]._pts,{padding:[35,35]}); } }, 150);
   }
+  window.addEventListener('load', function(){ initMap(0); });
 </script>
 </body>
 </html>
