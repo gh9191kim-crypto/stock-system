@@ -68,18 +68,43 @@
     padding:4px 10px;display:inline-block;margin-top:4px}
   .stop.travel{background:#f3f9ff;border:1px solid #d9ecfb}
   .stop.meal{background:#fff8f4;border:1px solid #ffe2d3}
+  .traintime{font-size:.8rem;font-weight:800;color:#0a66c2;background:#e8f1fc;
+    border:1px solid #cfe0fb;border-radius:8px;padding:4px 10px;display:inline-block;margin:4px 0}
   .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
   .tag{font-size:.72rem;padding:3px 9px;border-radius:20px;font-weight:700;color:#fff}
   .t-dad{background:#1d9bf0}.t-mom{background:#e0245e}.t-kids{background:#17bf63}
   .t-all{background:#794bc4}.t-beer{background:var(--beer);color:#5a4500}.t-food{background:#ff6a3d}
-  /* 식당 평점/리뷰 링크 버튼 */
-  .rate{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+  /* 시그니처 음식 이미지 */
+  .dish{margin:8px 0;border-radius:11px;overflow:hidden;border:1px solid #eee}
+  .dish img{width:100%;height:160px;object-fit:cover;display:block;background:#f0ede8}
+  .dish-name{font-size:.84rem;font-weight:800;padding:7px 11px;background:#fff8f4;color:#a23b00}
+  /* 관광지 대표 이미지 + 볼거리 */
+  .spot{margin:8px 0;border-radius:11px;overflow:hidden;border:1px solid #e7ebf2}
+  .spot img{width:100%;height:165px;object-fit:cover;display:block;background:#eef0f4}
+  .spot-cap{font-size:.82rem;font-weight:800;padding:7px 11px;background:#eef6ff;color:#0a4d8c}
+  .highlights{font-size:.83rem;color:#2a3340;background:#f5f9ff;border:1px solid #e1ecfb;
+    border-radius:9px;padding:8px 12px;margin-top:6px}
+  .highlights b{color:#0a66c2}
+  /* 예약 버튼 */
+  .resv{display:inline-flex;align-items:center;gap:5px;font-size:.79rem;font-weight:800;
+    text-decoration:none;background:#e0245e;color:#fff;border-radius:9px;padding:7px 13px;margin-top:7px;
+    box-shadow:0 2px 8px rgba(224,36,94,.25)}
+  .resv.tl{background:#16a34a;box-shadow:0 2px 8px rgba(22,163,74,.25)}
+  .resv-note{font-size:.76rem;color:#b81b4b;font-weight:700;margin-top:6px}
+  /* 평점 배지 */
+  .scores{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 2px}
+  .score{font-size:.77rem;font-weight:800;padding:3px 10px;border-radius:8px;white-space:nowrap}
+  .score.tb{background:#fff0e6;color:#d2691e;border:1px solid #ffd9bf}
+  .score.gg{background:#eaf2ff;color:#1a73e8;border:1px solid #cfe0fb}
+  .score.mi{background:#fdeaf0;color:#b81b4b;border:1px solid #f6cdda}
+  .score.etc{background:#eef7ee;color:#1a7d36;border:1px solid #c8e6cc}
+  /* 평점/리뷰 링크 버튼 */
+  .rate{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 2px}
   .rate a{font-size:.75rem;text-decoration:none;padding:5px 11px;border-radius:9px;
     font-weight:700;border:1px solid #e3e3e3;color:#333;background:#fafafa;display:inline-flex;gap:4px;align-items:center}
   .rate a.g{color:#1a73e8;border-color:#cfe0fb;background:#f3f8ff}
   .rate a.n{color:#03c75a;border-color:#bdeccd;background:#f1fcf5}
   .rate a.t{color:#ff6a3d;border-color:#ffd9c9;background:#fff5f0}
-  .rate a:active{transform:scale(.96)}
   .menu-hint{font-size:.8rem;color:#8a6d00;background:#fffae8;border-radius:7px;padding:3px 9px;display:inline-block;margin-top:4px}
   .tip{background:#fff8e6;border-left:4px solid var(--beer);border-radius:8px;
     padding:8px 12px;font-size:.82rem;color:#6b5500;margin-top:8px}
@@ -87,8 +112,9 @@
   footer{text-align:center;padding:30px 20px 50px;color:var(--muted);font-size:.82rem}
   .legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 24px}
   .note{background:#eef6ff;border:1px solid #cfe4fb;border-radius:12px;padding:14px 18px;
-    font-size:.84rem;color:#234;margin-bottom:20px}
+    font-size:.84rem;color:#234;margin-bottom:14px}
   .note b{color:var(--accent)}
+  .ratenote{font-size:.78rem;color:#777;background:#f7f7f9;border-radius:10px;padding:10px 14px;margin-bottom:20px}
 </style>
 </head>
 <body>
@@ -122,9 +148,13 @@
   </div>
 
   <div class="note">
-    💡 <b>이번 일정 기준</b> — 호텔이 있는 <b>롯폰기를 베이스</b>로 매일 한 방향씩 움직여 <b>이동 최소화</b>.
-    첫날은 체크인 후 <b>호텔 근처에서 점심부터</b>, 마지막 날은 <b>신주쿠 이세탄 백화점 쇼핑</b>(불가리 목걸이) 후 공항으로.
-    🍽️ <b>모든 식사</b>엔 <b>구글 지도 · 네이버 후기 · 타베로그</b> 링크를 달아뒀어요 — 버튼을 누르면 <b>실시간 평점·리뷰·블로그</b>가 열려요. (평점은 수시로 바뀌어 링크로 연결했어요)
+    💡 <b>이번 일정 기준</b> — <b>롯폰기 베이스</b>로 매일 한 방향씩 이동 최소화. 첫날은 체크인 후 <b>호텔 근처 점심부터</b>,
+    마지막 날은 <b>신주쿠 이세탄 백화점 쇼핑</b>(불가리 목걸이) 후 공항으로. 공항 왕복은 <b>나리타 익스프레스(N'EX) 기차</b>로,
+    앞뒤 <b>20분 버퍼</b>를 넣고 <b>기차 시각</b>까지 표기했어요. 식사마다 <b>시그니처 음식 사진·이름 + 평점 + 후기 링크</b>를 달았습니다.
+  </div>
+  <div class="ratenote">
+    ⭐ <b>평점 보는 법</b> — 일본은 <b>타베로그(食べログ)</b> 점수가 기준이에요. <b>3.5 이상이면 인기 맛집</b>, 3.0~3.4도 보통 이상(일본은 점수가 박한 편).
+    아래 숫자는 <b>2026년 6월 조사 기준</b>이며, 실시간 구글·네이버 평점은 각 식당의 <b>버튼</b>을 누르면 바로 확인돼요. (음식 사진은 메뉴 이해를 돕는 대표 이미지입니다)
   </div>
 
   <div class="tabs">
@@ -143,7 +173,7 @@
   <section class="day active">
     <div class="day-head">
       <h2>1일차 · 7/28(화) 도착 → 롯폰기·도쿄타워</h2>
-      <div class="route">🚶 동선: <b>나리타 → 롯폰기 호텔(체크인·점심) → 미드타운/롯폰기힐스 → 도쿄타워</b></div>
+      <div class="route">🚶 동선: <b>나리타 →(N'EX→신주쿠→오에도선) 롯폰기 호텔(체크인·점심) → 미드타운/롯폰기힐스 → 도쿄타워</b></div>
     </div>
     <div class="timeline">
       <div class="stop travel">
@@ -153,55 +183,66 @@
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">10:40 ~ 11:40</div>
+        <div class="time">10:40 ~ 11:50</div>
         <h3>🛂 입국심사 · 수하물 찾기</h3>
         <p>국제선 도착 후 입국·짐 찾기 약 1시간.</p>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">11:40 ~ 12:10 · ⏱ 버퍼 30분</div>
-        <h3>🎫 공항역 이동 · N'EX 발권 · 승강장 대기</h3>
-        <p>앞쪽 여유 30분: 공항 지하 JR역으로 이동해 나리타 익스프레스(N'EX) 표 발권·좌석지정 후 승강장 대기.</p>
+        <div class="time">11:50 ~ 12:10 · ⏱ 버퍼 20분</div>
+        <h3>🎫 공항역 이동 · N'EX 발권 · 승강장</h3>
+        <p>앞쪽 여유 20분: 공항 지하 JR역에서 나리타 익스프레스 표 발권·좌석지정 후 승강장으로.</p>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">12:10 ~ 13:30</div>
+        <div class="time">12:14 ~ 13:33</div>
         <h3>🚆 나리타 익스프레스(N'EX) → 신주쿠</h3>
         <p>전 좌석 지정·대형 짐칸이 있어 가족 여행에 딱! 나리타공항 → 신주쿠 직통.</p>
-        <div class="move">🚆 N'EX 약 80분 (시간대는 예매 시 확인)</div>
-        <div class="tip"><b>대안 기차</b> — 게이세이 <b>스카이라이너</b>(나리타→우에노 약 45분)도 빨라요. 그땐 우에노에서 히비야선으로 롯폰기.</div>
+        <span class="traintime">🚆 N'EX 나리타공항 <b>12:14</b>발 → 신주쿠 <b>13:33</b>착 (약 80분)</span>
+        <div class="tip"><b>시각 참고</b> — N'EX는 30~60분 간격 운행. 위 시각은 대표값이고, <b>실제 시각·예약은 출발 전 확인</b>하세요. (대안: 게이세이 스카이라이너 나리타→우에노 약 45분)</div>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">13:30 ~ 14:00 · ⏱ 버퍼 30분</div>
+        <div class="time">13:33 ~ 13:53 · ⏱ 버퍼 20분</div>
         <h3>🚇 신주쿠역 환승 (오에도선)</h3>
-        <p>뒤쪽 여유 30분: 짐 들고 신주쿠역에서 도에이 오에도선으로 환승.</p>
-        <div class="move">🚇 오에도선 신주쿠 → 롯폰기 약 10분</div>
+        <p>뒤쪽 여유 20분: 짐 들고 도에이 오에도선으로 환승.</p>
+        <span class="traintime">🚇 오에도선 신주쿠 → 롯폰기 약 10분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
-        <div class="time">14:10</div>
+        <div class="time">14:05</div>
         <h3>🏨 미쓰이 가든 호텔 롯폰기 체크인 / 짐 보관</h3>
         <p>도착하자마자 체크인(또는 짐 맡기기). 객실 준비 전이면 프런트에 짐 보관 후 바로 점심!</p>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop meal">
-        <div class="time">14:30 · 점심</div>
-        <h3>🍜 이루카 도쿄 (イルカ東京) · 트러플 소유라멘</h3>
-        <p>호텔 근처 롯폰기역 도보 2~7분. 트러플 향 가득한 고급 소유라멘으로 한국 여행객 사이 인기. 첫날 가볍게 시작하기 좋아요.</p>
-        <span class="menu-hint">추천: 트러플 소유라멘 · 차슈동</span>
+        <div class="time">14:20 · 점심</div>
+        <h3>🍜 이루카 도쿄 (入鹿 TOKYO) · 롯폰기</h3>
+        <div class="dish">
+          <img loading="lazy" alt="트러플 소유라멘" src="https://loremflickr.com/360/200/ramen,truffle?lock=21" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍜 시그니처: 포르치니·트러플 소유라멘</div>
+        </div>
+        <p>호텔 근처 롯폰기역 도보 2분. 조개·새우·닭·소고기 4중 육수에 트러플 향을 더한 고급 소유라멘. 미슐랭 가이드 등재 맛집!</p>
+        <div class="scores">
+          <span class="score tb">타베로그 3.87</span>
+          <span class="score mi">⭐ 미슐랭 빕구르망 2026</span>
+        </div>
         <div class="rate">
-          <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=イルカ東京 六本木 ラーメン">⭐ 구글 지도·평점</a>
+          <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=入鹿 TOKYO 六本木 ラーメン">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=이루카도쿄 롯폰기 라멘 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=イルカ東京">🍴 타베로그</a>
+          <a class="t" target="_blank" href="https://tabelog.com/kr/tokyo/A1307/A130701/13264260/">🍴 타베로그</a>
         </div>
         <div class="move">🚶 호텔 도보 5~10분</div>
-        <div class="tip"><b>대안</b> — 아이들이 라멘보다 돈카츠를 원하면 롯폰기힐스 <b>부타구미 쇼쿠도</b>도 좋아요.</div>
         <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
-        <div class="time">15:00</div>
+        <div class="time">15:30</div>
         <h3>🛍️ 도쿄 미드타운 & 롯폰기 힐스</h3>
+        <div class="spot">
+          <img loading="lazy" alt="롯폰기 힐스" src="https://loremflickr.com/360/200/tokyo,city?lock=32" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 도쿄 미드타운 · 롯폰기 힐스</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 모리미술관·시티뷰 전망대 · 모리정원 산책 · 명품/잡화 쇼핑 · 계절 일루미네이션</div>
         <p>호텔 근처 고급 쇼핑몰. 엄마 쇼핑, 모리 정원 산책, 전망 카페. 아이들·아빠는 잠깐 휴식.</p>
         <div class="move">🚶 호텔 도보 5~10분</div>
         <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
@@ -209,6 +250,11 @@
       <div class="stop">
         <div class="time">17:30</div>
         <h3>🗼 도쿄타워 (야경) — 가고 싶다 하신 곳!</h3>
+        <div class="spot">
+          <img loading="lazy" alt="도쿄타워" src="https://loremflickr.com/360/200/tokyo,tower?lock=31" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 도쿄타워 (333m)</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 메인덱(150m)·탑덱(250m) 전망 · 발밑 유리바닥 · 야경/라이트업 · 1층 풋타운 기념품</div>
         <p>롯폰기에서 가장 가까운 랜드마크. 해 질 무렵 전망대 + 빨갛게 빛나는 도쿄타워 인증샷. 가족 필수 코스!</p>
         <div class="move">🚇 도보 15분 / 오에도선 1정거장(아카바네바시)</div>
         <div class="tags"><span class="tag t-all">온가족</span></div>
@@ -216,13 +262,22 @@
       <div class="stop meal">
         <div class="time">19:00 · 저녁</div>
         <h3>🍺 곤파치 니시아자부 (権八) · 이자카야 + 생맥주</h3>
-        <p>영화 '킬빌' 배경의 3층 대형 이자카야. 야키토리·소바·튀김에 생맥주, 영어 메뉴라 가족 외식에 편해요. 아빠 맥주 한잔!</p>
-        <span class="menu-hint">추천: 야키토리 모듬 · 자루소바 · 생맥주</span>
+        <div class="dish">
+          <img loading="lazy" alt="야키토리 닭꼬치" src="https://loremflickr.com/360/200/yakitori?lock=22" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍢 시그니처: 야키토리(닭꼬치) 모둠 · 자루소바</div>
+        </div>
+        <p>영화 '킬빌' 배경의 3층 대형 이자카야. 꼬치·소바·튀김에 생맥주, 영어 메뉴라 가족 외식에 편해요. 아빠 맥주 한잔!</p>
+        <div class="scores">
+          <span class="score tb">타베로그 3.09</span>
+          <span class="score etc">트립어드바이저 3.8</span>
+        </div>
         <div class="rate">
           <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=権八 西麻布 六本木">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=곤파치 롯폰기 니시아자부 후기">📝 네이버 후기</a>
           <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=権八 西麻布">🍴 타베로그</a>
         </div>
+        <div class="resv-note">⚠️ 인기 매장 — 저녁은 예약 권장</div>
+        <a class="resv" target="_blank" href="https://gonpachi.jp/nishi-azabu/">📅 곤파치 예약 (공식)</a>
         <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
     </div>
@@ -239,12 +294,17 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 아키하바라</h3>
         <p>히비야선 한 번에 직통이라 편해요.</p>
-        <div class="move">🚇 히비야선 직통 약 20분</div>
+        <span class="traintime">🚇 히비야선 직통 약 20분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
         <div class="time">09:30</div>
         <h3>🤖 아키하바라 — 피규어 & 전자상가</h3>
+        <div class="spot">
+          <img loading="lazy" alt="아키하바라" src="https://loremflickr.com/360/200/akihabara,tokyo?lock=33" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 아키하바라 전자상가</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 피규어·프라모델 전문점 · 애니/만화 굿즈 · 레트로·아케이드 게임 · 가챠(뽑기) 거리</div>
         <p><b>코토부키야·만다라케·아미아미</b> 피규어/프라모델, <b>라디오회관</b>은 건물 전체가 피규어 백화점!</p>
         <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
       </div>
@@ -258,12 +318,18 @@
       <div class="stop meal">
         <div class="time">12:30 · 점심</div>
         <h3>🍜 큐슈 장가라 라멘 (九州じゃんがら) 아키하바라 본점</h3>
+        <div class="dish">
+          <img loading="lazy" alt="돈코츠 라멘" src="https://loremflickr.com/360/200/ramen,tonkotsu?lock=23" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍜 시그니처: 본샨(ぼんしゃん) — 명란+차슈 돈코츠 라멘</div>
+        </div>
         <p>아키하바라 명물 돈코츠 라멘. 진한 국물에 명란·차슈 토핑이 한국인 입맛에 잘 맞아 늘 인기.</p>
-        <span class="menu-hint">추천: 본샨 라멘(명란+차슈) · 카에다마(면 추가)</span>
+        <div class="scores">
+          <span class="score tb">타베로그 3.46</span>
+        </div>
         <div class="rate">
           <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=九州じゃんがら 秋葉原本店">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=큐슈 장가라 아키하바라 라멘 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=九州じゃんがら 秋葉原本店">🍴 타베로그</a>
+          <a class="t" target="_blank" href="https://tabelog.com/kr/tokyo/A1310/A131001/13000344/">🍴 타베로그</a>
         </div>
         <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
@@ -271,25 +337,39 @@
         <div class="time">14:00</div>
         <h3>🚇 아키하바라 → 우에노</h3>
         <p>히비야선/JR로 금방. 바로 옆 동네.</p>
-        <div class="move">🚇 약 5분</div>
+        <span class="traintime">🚇 약 5분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
         <div class="time">14:20</div>
         <h3>🐼 우에노 공원 & 아메요코 시장</h3>
+        <div class="spot">
+          <img loading="lazy" alt="아메요코 시장" src="https://loremflickr.com/360/200/market,street?lock=35" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 우에노 공원 · 아메요코 시장</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 활기찬 재래시장 · 수산물·건어물·간식 노점 · 과자/드러그스토어 저렴 쇼핑 · 공원 산책</div>
         <p>공원 산책 후 <b>아메요코 시장</b>에서 길거리 먹거리·쇼핑. 활기찬 시장 구경.</p>
         <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-mom">엄마</span></div>
       </div>
       <div class="stop meal">
         <div class="time">18:00 · 저녁</div>
         <h3>🍺 이소마루 수산 (磯丸水産) 우에노 · 해산물 이자카야</h3>
+        <div class="dish">
+          <img loading="lazy" alt="해산물 모둠회" src="https://loremflickr.com/360/200/sashimi,seafood?lock=24" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🦪 시그니처: 조개 화로구이 · 모둠회 · 해물덮밥</div>
+        </div>
         <p>신선한 해산물 숯불구이·회·해물덮밥에 생맥주. 활기찬 분위기, 가성비 좋고 한국인에게도 인기.</p>
-        <span class="menu-hint">추천: 조개 화로구이 · 모듬회 · 생맥주</span>
+        <div class="scores">
+          <span class="score tb">타베로그 3.08</span>
+          <span class="score gg">구글맵 약 4.0</span>
+        </div>
         <div class="rate">
           <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=磯丸水産 上野">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=이소마루수산 우에노 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=磯丸水産 上野">🍴 타베로그</a>
+          <a class="t" target="_blank" href="https://tabelog.com/kr/tokyo/A1311/A131101/13128677/">🍴 타베로그</a>
         </div>
+        <div class="resv-note">⚠️ 4인 저녁 — 예약 권장</div>
+        <a class="resv" target="_blank" href="https://tabelog.com/kr/tokyo/A1311/A131101/13128677/">📅 타베로그로 예약</a>
         <div class="move">🚇 저녁 후 롯폰기 복귀 (히비야선 약 25분)</div>
         <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span></div>
       </div>
@@ -307,21 +387,33 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 도요스</h3>
         <p>오에도선 + 유라쿠초선 환승.</p>
-        <div class="move">🚇 약 30분</div>
+        <span class="traintime">🚇 약 30분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
         <div class="time">10:00</div>
         <h3>🌊 teamLab Planets (도요스)</h3>
+        <div class="spot">
+          <img loading="lazy" alt="teamLab Planets" src="https://loremflickr.com/360/200/light,art?lock=36" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 teamLab Planets TOKYO</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 물에 들어가 걷는 작품 · 무한 거울방 · 빛의 꽃·우주 공간 · 맨발 체험(짧은 바지 추천)</div>
         <p>물에 들어가 빛·꽃에 둘러싸이는 몰입형 디지털 아트. 온가족 인생샷! <b>온라인 사전예약 필수</b>.</p>
         <div class="tip"><b>예약 팁</b> — 7/30 오전 시간대로 미리 예약하세요. 인기라 매진 빨라요. (예약 도와드릴까요?)</div>
+        <a class="resv tl" target="_blank" href="https://planets.teamlab.art/tokyo/">🎫 teamLab 티켓 예약 (공식)</a>
         <div class="tags"><span class="tag t-all">온가족</span><span class="tag t-kids">아이들</span></div>
       </div>
       <div class="stop meal">
         <div class="time">12:00 · 점심</div>
         <h3>🍱 라라포트 도요스 (LaLaport 豊洲) 레스토랑가</h3>
+        <div class="dish">
+          <img loading="lazy" alt="가족 메뉴" src="https://loremflickr.com/360/200/omurice,japanese?lock=25" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍳 시그니처: 가족별 골라먹기 (오므라이스·돈카츠·우동·카레)</div>
+        </div>
         <p>teamLab 바로 옆 대형 쇼핑몰. 라멘·돈부리·패밀리 레스토랑·키즈 메뉴까지 많아 아이들과 먹기 편해요.</p>
-        <span class="menu-hint">추천: 가족별 각자 취향대로 (라멘/돈카츠/우동/카레)</span>
+        <div class="scores">
+          <span class="score etc">쇼핑몰 · 식당별 평점 상이</span>
+        </div>
         <div class="rate">
           <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=ららぽーと豊洲 レストラン">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=라라포트 도요스 맛집 후기">📝 네이버 후기</a>
@@ -333,30 +425,46 @@
         <div class="time">13:30</div>
         <h3>🚝 도요스 → 오다이바</h3>
         <p>유리카모메(모노레일)로 바다 위를 달려요.</p>
-        <div class="move">🚝 유리카모메 약 15분</div>
+        <span class="traintime">🚝 유리카모메 약 15분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
         <div class="time">14:00</div>
         <h3>🤖 실물대 유니콘 건담 & 건담 베이스 도쿄</h3>
+        <div class="spot">
+          <img loading="lazy" alt="실물대 유니콘 건담" src="https://loremflickr.com/360/200/gundam,robot?lock=37" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 실물대 유니콘 건담 (19.7m)</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 19.7m 실물대 건담 · 낮·밤 변신/라이트업 연출 · 건담베이스(프라모델 천국) · 다이버시티 쇼핑</div>
         <p>다이버시티 앞 <b>19.7m 실물대 유니콘 건담</b> — 아빠 버킷리스트! 시간대별 변신 연출도. 안쪽 <b>건담 베이스</b>는 프라모델 천국.</p>
         <div class="tags"><span class="tag t-dad">아빠</span><span class="tag t-kids">아이들</span></div>
       </div>
       <div class="stop">
         <div class="time">16:00</div>
         <h3>🛍️ 다이버시티·아쿠아시티 쇼핑 & 야경</h3>
+        <div class="spot">
+          <img loading="lazy" alt="레인보우브릿지 야경" src="https://loremflickr.com/360/200/rainbow,bridge?lock=38" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 오다이바 해변 · 레인보우브릿지</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 자유의 여신상 · 레인보우브릿지 야경 · 아쿠아시티/다이버시티 쇼핑 · 바다 전망 포토존</div>
         <p>엄마 쇼핑 시간. 해 질 무렵 자유의 여신상 + 레인보우브릿지 야경 포토존.</p>
         <div class="tags"><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop meal">
         <div class="time">18:30 · 저녁</div>
         <h3>🍺 도쿄 라멘 국기관 마이 (아쿠아시티 오다이바 5F)</h3>
-        <p>일본 각지 유명 라멘이 모인 '라멘 테마파크'. 가족이 각자 다른 라멘을 골라 먹고, 테라스에선 레인보우브릿지 야경까지! 맥주도 OK.</p>
-        <span class="menu-hint">추천: 하카타 돈코츠 · 삿포로 미소 · 츠케멘 (각자 취향)</span>
+        <div class="dish">
+          <img loading="lazy" alt="라멘" src="https://loremflickr.com/360/200/ramen?lock=26" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍜 시그니처: 전국 유명 라멘 골라먹기 (하카타 돈코츠·삿포로 미소·츠케멘)</div>
+        </div>
+        <p>일본 각지 유명 라멘이 모인 '라멘 테마파크'(2026.3 리뉴얼). 가족이 각자 다른 라멘을 고르고, 테라스에선 레인보우브릿지 야경까지! 맥주도 OK.</p>
+        <div class="scores">
+          <span class="score etc">자란 3.6 · 가족 인기</span>
+        </div>
         <div class="rate">
           <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=東京ラーメン国技館 舞 アクアシティお台場">⭐ 구글 지도·평점</a>
           <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=오다이바 라멘 국기관 아쿠아시티 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=東京ラーメン国技館 舞">🍴 타베로그</a>
+          <a class="t" target="_blank" href="https://www.aquacity.jp/trk_mai/">🍴 매장 안내</a>
         </div>
         <div class="move">🚇 저녁 후 롯폰기 복귀 약 40분</div>
         <div class="tags"><span class="tag t-beer">맥주</span><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
@@ -381,7 +489,7 @@
         <div class="time">09:00</div>
         <h3>🚇 롯폰기 → 신주쿠</h3>
         <p>오에도선 한 번에 직통. 환승 없이 편해요.</p>
-        <div class="move">🚇 오에도선 직통 약 10분</div>
+        <span class="traintime">🚇 오에도선 직통 약 10분</span>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop">
@@ -393,6 +501,11 @@
       <div class="stop">
         <div class="time">10:00 ~ 11:30 · 쇼핑</div>
         <h3>🛍️ 이세탄 신주쿠 본점 — 백화점 쇼핑 (💎 불가리 목걸이!)</h3>
+        <div class="spot">
+          <img loading="lazy" alt="이세탄 신주쿠" src="https://loremflickr.com/360/200/shopping,luxury?lock=39" onerror="this.closest('.spot').style.display='none'">
+          <div class="spot-cap">📸 이세탄 신주쿠 본점</div>
+        </div>
+        <div class="highlights"><b>볼거리</b> · 💎 불가리 등 명품 주얼리(1F/4F) · 데파치카(지하 식품관) · 디저트·한정 기념품 · 면세 카운터</div>
         <p>도쿄 대표 백화점. <b>불가리(BVLGARI) 부티크가 본관 1층 명품관/4층에 입점</b>해 있어 목걸이 등 주얼리를 직접 볼 수 있어요. 엄마 메인 쇼핑 시간! 지하 식품관(데파치카)도 구경거리.</p>
         <span class="menu-hint">💎 불가리: 본관 1F 명품관 / 4F · 10:00 오픈</span>
         <div class="rate">
@@ -404,35 +517,43 @@
       </div>
       <div class="stop meal">
         <div class="time">11:30 · 점심 (백화점 근처)</div>
-        <h3>🍤 텐푸라 츠나하치 (つな八) 신주쿠 본점</h3>
-        <p>이세탄에서 도보 3~5분. 1924년 창업한 노포 튀김(덴푸라) 전문점. 눈앞에서 갓 튀겨주는 텐동·정식이 한국인에게도 인기. 마지막 식사로 든든하게!</p>
-        <span class="menu-hint">추천: 텐푸라 정식 · 텐동 · 새우튀김</span>
-        <div class="rate">
-          <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=つな八 新宿本店 天ぷら">⭐ 구글 지도·평점</a>
-          <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=츠나하치 신주쿠 덴푸라 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=つな八 新宿本店">🍴 타베로그</a>
+        <h3>🍤 텐푸라 신주쿠 츠나하치 (つな八) 총본점</h3>
+        <div class="dish">
+          <img loading="lazy" alt="텐동 튀김덮밥" src="https://loremflickr.com/360/200/tempura?lock=27" onerror="this.closest('.dish').style.display='none'">
+          <div class="dish-name">🍤 시그니처: 텐동(튀김덮밥) · 텐푸라 정식 · 새우튀김</div>
         </div>
-        <div class="tip"><b>대안</b> — 줄이 길면 이세탄 <b>레스토랑가(7층)</b>나 데파치카 도시락으로 빠르게 해결 가능!</div>
+        <p>이세탄에서 도보 3~5분. 1924년 창업한 노포 튀김 전문점. 눈앞에서 갓 튀겨주는 텐동·정식이 한국인에게도 인기. 마지막 식사로 든든하게!</p>
+        <div class="scores">
+          <span class="score etc">1924년 창업 노포 · 타베로그 3.5대</span>
+        </div>
+        <div class="rate">
+          <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=新宿つな八 総本店 天ぷら">⭐ 구글 지도·평점</a>
+          <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=츠나하치 신주쿠 덴푸라 후기">📝 네이버 후기</a>
+          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=新宿つな八 総本店">🍴 타베로그</a>
+        </div>
+        <div class="resv-note">⚠️ 인기 노포 — 예약 가능(권장)</div>
+        <a class="resv" target="_blank" href="https://www.hotpepper.jp/strJ003942175/">📅 핫페퍼로 예약</a>
+        <div class="tip"><b>대안</b> — 줄이 길면 이세탄 <b>레스토랑가(7층)</b>나 데파치카 도시락으로 빠르게!</div>
         <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">12:30 ~ 13:00 · ⏱ 버퍼 30분</div>
+        <div class="time">12:45 ~ 13:05 · ⏱ 버퍼 20분</div>
         <h3>🔐 짐 찾기 · N'EX 발권 · 승강장</h3>
-        <p>앞쪽 여유 30분: 신주쿠역에서 맡긴 짐을 찾고 나리타 익스프레스(N'EX) 표 발권·승강장 대기.</p>
+        <p>앞쪽 여유 20분: 신주쿠역에서 맡긴 짐을 찾고 N'EX 표 발권·승강장 대기.</p>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">13:00 ~ 14:25</div>
+        <div class="time">13:07 ~ 14:30</div>
         <h3>🚆 나리타 익스프레스(N'EX) → 나리타 공항</h3>
         <p>신주쿠에서 공항까지 직통. 좌석 지정·짐칸이 있어 편해요.</p>
-        <div class="move">🚆 N'EX 약 85분 (시간대는 예매 시 확인)</div>
-        <div class="tip"><b>⏰ 시간 주의</b> — 비행기 17:15(국제선)라 <b>늦어도 13시엔 N'EX 탑승</b>! 쇼핑이 길어질 듯하면 점심을 데파치카 도시락으로 간단히.</div>
+        <span class="traintime">🚆 N'EX 신주쿠 <b>13:07</b>발 → 나리타공항 <b>14:30</b>착 (약 83분)</span>
+        <div class="tip"><b>⏰ 시간 주의</b> — 비행기 17:15(국제선)라 <b>늦어도 13시대 N'EX 탑승</b>! 위 시각은 대표값이라 출발 전 실제 시각 확인. 쇼핑이 길어질 듯하면 점심을 데파치카 도시락으로.</div>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
-        <div class="time">14:25 ~ 14:55 · ⏱ 버퍼 30분</div>
+        <div class="time">14:30 ~ 14:50 · ⏱ 버퍼 20분</div>
         <h3>🛫 공항 도착 · 체크인 카운터 이동</h3>
-        <p>뒤쪽 여유 30분: 나리타 도착 후 터미널·체크인 카운터로 이동. 출발 2시간여 전이라 여유 있어요.</p>
+        <p>뒤쪽 여유 20분: 나리타 도착 후 터미널·체크인 카운터로. 출발 2시간여 전이라 여유 있어요.</p>
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop travel">
@@ -446,7 +567,8 @@
 </div>
 
 <footer>
-  🗼 도쿄 가족여행 (2026.7.28~7.31) · 롯폰기 베이스 — 정보 주시는 대로 계속 업데이트됩니다 ✨
+  🗼 도쿄 가족여행 (2026.7.28~7.31) · 롯폰기 베이스 — 정보 주시는 대로 계속 업데이트됩니다 ✨<br>
+  ※ 평점은 2026.6 조사 기준 · 음식 사진은 메뉴 이해용 대표 이미지
 </footer>
 
 <script>
