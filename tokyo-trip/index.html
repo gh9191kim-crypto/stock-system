@@ -140,6 +140,9 @@
   .tip{background:#fff8e6;border-left:4px solid var(--beer);border-radius:8px;
     padding:8px 12px;font-size:.82rem;color:#6b5500;margin-top:8px}
   .tip b{color:#a07a00}
+  .opt{border:1px solid #e7e0ef;border-radius:12px;padding:10px 12px;margin-top:10px;background:#faf8fd}
+  .opt-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-weight:800;font-size:.92rem;margin-bottom:4px}
+  .opt-pick{background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;flex:none}
   footer{text-align:center;padding:30px 20px 50px;color:var(--muted);font-size:.82rem}
   .legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 24px}
   .note{background:#eef6ff;border:1px solid #cfe4fb;border-radius:12px;padding:14px 18px;
@@ -243,24 +246,54 @@
         <div class="tags"><span class="tag t-all">온가족</span></div>
       </div>
       <div class="stop meal">
-        <div class="time">14:20 · 점심</div>
-        <h3>🍜 AFURI 아후리 · 롯폰기 힐스</h3>
-        <div class="dish">
-          <img loading="lazy" alt="유즈 시오 라멘" src="https://commons.wikimedia.org/wiki/Special:FilePath/Shoyu_Ramen.jpg?width=480" onerror="this.closest('.dish').style.display='none'">
-          <div class="dish-name">🍜 시그니처: 유즈 시오 라멘 (상큼한 유자 소금 라멘)</div>
+        <div class="time">14:20 · 점심 (롯폰기 · 셋 중 택1)</div>
+        <h3>🍜 롯폰기 점심 맛집 — 취향대로 골라요</h3>
+        <p>아래 세 곳 모두 <b>호텔 도보권 · 같은 동선(롯폰기)</b>이라, 그날 기분 따라 한 곳만 골라 가시면 돼요!</p>
+
+        <div class="opt">
+          <div class="opt-head"><span class="opt-pick">①</span> AFURI 아후리 · 롯폰기 힐스 <span class="score gg">구글 ★4.6</span></div>
+          <div class="dish">
+            <img loading="lazy" alt="유즈 시오 라멘" src="https://commons.wikimedia.org/wiki/Special:FilePath/Shoyu_Ramen.jpg?width=480" onerror="this.closest('.dish').style.display='none'">
+            <div class="dish-name">🍜 유즈 시오 라멘 (상큼한 유자 소금 라멘)</div>
+          </div>
+          <p>👩 와이프 추천! 유자향 맑은 시오 라멘. 롯폰기 힐스, 호텔 도보 약 5분 · ¥1,000~2,000.</p>
+          <div class="rate">
+            <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=AFURI 六本木ヒルズ ラーメン">⭐ 구글 지도</a>
+            <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=아후리 롯폰기힐스 유즈시오 라멘 후기">📝 네이버 후기</a>
+            <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=AFURI 六本木ヒルズ">🍴 타베로그</a>
+          </div>
         </div>
-        <p>👩 와이프 추천! 롯폰기 힐스에 있는 인기 라멘. 유자(유즈) 향이 상큼한 맑은 시오(소금) 라멘으로 한국인에게도 인기 폭발. 호텔에서 도보 약 5분, 첫날 점심으로 딱이에요!</p>
-        <div class="scores">
-          <span class="score gg">구글 ★4.6 (3,300+)</span>
-          <span class="score etc">유즈 시오 라멘 명가 · ¥1,000~2,000</span>
+
+        <div class="opt">
+          <div class="opt-head"><span class="opt-pick">②</span> 이루카 도쿄 (入鹿 TOKYO) · 롯폰기 <span class="score tb">타베로그 3.87</span> <span class="score mi">⭐ 빕구르망</span></div>
+          <div class="dish">
+            <img loading="lazy" alt="트러플 소유라멘" src="https://commons.wikimedia.org/wiki/Special:FilePath/Hakata_Style_48-Hour_Tonkotsu_Ramen.jpg?width=480" onerror="this.closest('.dish').style.display='none'">
+            <div class="dish-name">🍜 포르치니·트러플 소유라멘</div>
+          </div>
+          <p>조개·새우·닭·소고기 4중 육수에 트러플 향을 더한 고급 소유라멘. 미슐랭 가이드 등재 · 롯폰기역 도보 2분.</p>
+          <div class="rate">
+            <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=入鹿 TOKYO 六本木 ラーメン">⭐ 구글 지도</a>
+            <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=이루카도쿄 롯폰기 라멘 후기">📝 네이버 후기</a>
+            <a class="t" target="_blank" href="https://tabelog.com/kr/tokyo/A1307/A130701/13264260/">🍴 타베로그</a>
+          </div>
         </div>
-        <div class="rate">
-          <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=AFURI 六本木ヒルズ ラーメン">⭐ 구글 지도·평점</a>
-          <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=아후리 롯폰기힐스 유즈시오 라멘 후기">📝 네이버 후기</a>
-          <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=AFURI 六本木ヒルズ">🍴 타베로그</a>
+
+        <div class="opt">
+          <div class="opt-head"><span class="opt-pick">③</span> 코히엔 (香妃園) · 롯폰기 <span class="score gg">구글 ★4.2</span></div>
+          <div class="dish">
+            <img loading="lazy" alt="토리소바" src="https://commons.wikimedia.org/wiki/Special:FilePath/Tori_paitan_ramen.jpg?width=480" onerror="this.closest('.dish').style.display='none'">
+            <div class="dish-name">🍲 토리소바 (닭 국물 소바) · 롯폰기 노포 중화</div>
+          </div>
+          <p>👩 와이프 추천! 롯폰기의 오래된 중화요리 노포. 부드러운 닭 국물 명물 '토리소바'가 유명 · ¥1,000~2,000 · 호텔 도보권.</p>
+          <div class="rate">
+            <a class="g" target="_blank" href="https://www.google.com/maps/search/?api=1&query=香妃園 六本木">⭐ 구글 지도</a>
+            <a class="n" target="_blank" href="https://search.naver.com/search.naver?query=코히엔 롯폰기 토리소바 후기">📝 네이버 후기</a>
+            <a class="t" target="_blank" href="https://tabelog.com/kr/rstLst/?sk=香妃園 六本木">🍴 타베로그</a>
+          </div>
         </div>
-        <div class="move">🚶 호텔 도보 약 5분 (롯폰기 힐스)</div>
-        <div class="tip"><b>대안</b> — 트러플 라멘이 당기면 <b>이루카 도쿄(미슐랭 빕구르망)</b>도 롯폰기에 있어요.</div>
+
+        <div class="tip"><b>택1 가이드</b> — 깔끔한 유자라멘 = ① AFURI · 미슐랭 트러플라멘 = ② 이루카 · 중화 토리소바 = ③ 코히엔. 셋 다 롯폰기라 동선 부담 0!</div>
+        <div class="move">🚶 세 곳 모두 호텔에서 도보권 (롯폰기)</div>
         <div class="tags"><span class="tag t-food">맛집</span><span class="tag t-mom">엄마</span><span class="tag t-all">온가족</span></div>
       </div>
       <div class="hop"><span class="ic">🚶</span><span>AFURI(롯폰기 힐스) → 도쿄 미드타운 · <b>도보 약 8분</b></span></div>
@@ -640,7 +673,7 @@
       dir:'https://www.google.com/maps/dir/?api=1&origin=35.6635,139.7320&destination=35.6586,139.7454&waypoints=35.6620,139.7305%7C35.6605,139.7295%7C35.6586,139.7237&travelmode=transit&hl=ko',
       spots:[
         {num:'1',name:'호텔(롯폰기)',ll:[35.6635,139.7320]},
-        {num:'2',name:'AFURI 롯폰기힐스 · 점심',km:0.3,ll:[35.6600,139.7290]},
+        {num:'2',name:'롯폰기 점심 · AFURI/이루카/코히엔 택1',km:0.3,ll:[35.6600,139.7290]},
         {num:'3',name:'미드타운·롯폰기힐스 · 쇼핑',km:0.3,ll:[35.6605,139.7295]},
         {num:'4',name:'곤파치 · 저녁',km:0.7,ll:[35.6586,139.7237]},
         {num:'5',name:'도쿄타워 · 야경',km:2.0,ll:[35.6586,139.7454]}
