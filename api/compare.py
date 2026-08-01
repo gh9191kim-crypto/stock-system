@@ -265,6 +265,63 @@ def run_ratchet_strategy(df, capital_krw, th, w, apply_fx, fee_rate):
     return records, events, total_fee
 
 
+# ── 전략 C: 기본 레버리지 슬리브 + 나머지에 래칫 적용 (하이브리드) ─────────
+def hybrid_target_weights(base_pct, w1, w2):
+    """base_pct 만큼은 항상 QLD로 고정 보유하고, 나머지(1-base_pct)에 기존
+    래칫 비중(w1, w2)을 적용한다. base_pct=0이면 ratchet_target_weights와 동일."""
+    r = 1 - base_pct
+    return [
+        {"QQQ": r, "QLD": base_pct, "TQQQ": 0.0},
+        {"QQQ": r * (1 - w1), "QLD": base_pct + r * w1, "TQQQ": 0.0},
+        {"QQQ": r * (1 - w1 - w2), "QLD": base_pct + r * w1, "TQQQ": r * w2},
+        {"QQQ": 0.0, "QLD": base_pct + r * w1, "TQQQ": r * (1 - w1)},
+        {"QQQ": 0.0, "QLD": 0.0, "TQQQ": 1.0},
+    ]
+
+
+def run_hybrid_ratchet_strategy(df, capital_krw, base_pct, th, w, apply_fx, fee_rate):
+    assets = ["QQQ", "QLD", "TQQQ"]
+    fx_series = fx_series_for(df, apply_fx)
+    fx0 = fx_series.iloc[0]
+    capital_usd = capital_krw / fx0
+    target_states = hybrid_target_weights(base_pct, w["w1"], w["w2"])
+    init_w = target_states[0]
+    shares = {a: (capital_usd * init_w[a]) / df[a].iloc[0] if init_w[a] > 0 else 0.0 for a in assets}
+    peak = df["QQQ"].iloc[0]
+    state = 0
+    records, events = [], []
+    total_fee = 0.0
+
+    for dt, row in df.iterrows():
+        peak = max(peak, row["QQQ"])
+        dd = (peak - row["QQQ"]) / peak
+        new_state = state
+        if dd >= th["th4"]:
+            new_state = 4
+        elif dd >= th["th3"]:
+            new_state = 3
+        elif dd >= th["th2"]:
+            new_state = 2
+        elif dd >= th["th1"]:
+            new_state = 1
+        if new_state > state:
+            target_w = target_states[new_state]
+            value = sum(shares[a] * row[a] for a in assets)
+            turnover = sum(abs(value * target_w[a] - shares[a] * row[a]) for a in assets) / 2
+            fee = turnover * fee_rate
+            value -= fee
+            total_fee += fee
+            shares = {a: (value * target_w[a]) / row[a] if target_w[a] > 0 else 0.0 for a in assets}
+            events.append({"date": dt.date().isoformat(), "type": "REBALANCE",
+                            "reason": f"QQQ -{dd*100:.1f}% (단계 {new_state})", "value_usd": value})
+            state = new_state
+        value_usd = sum(shares[a] * row[a] for a in assets)
+        fx = fx_series.loc[dt]
+        records.append({"date": dt.date().isoformat(), "value_krw": value_usd * fx})
+
+    return records, events, total_fee
+
+
 def run_buyhold(df, capital_krw, ticker, apply_fx):
     """ticker를 시작일에 전액 매수해 그대로 보유 (하락 대응 없이 단순 매수후보유).
     QQQ/QLD/TQQQ 처럼 조회 구간 전체에 데이터가 있는 티커에만 사용한다 (BULZ처럼
