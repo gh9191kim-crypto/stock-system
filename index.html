@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>나스닥 하락 대응 레버리지 전환 백테스트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --border:#e2e8f0; --text:#1e293b; --muted:#64748b; --sub:#94a3b8;
+    --red:#dc2626; --blue:#2563eb; --amber:#f59e0b; --orange:#f97316; --deepred:#991b1b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px;}
+  h1{font-size:22px;margin:0 0 4px;}
+  .caption{color:var(--muted);font-size:13px;margin-bottom:20px;}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:20px;}
+  .panel h2{font-size:14px;margin:0 0 14px;color:var(--text);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+  label{display:block;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  input[type=number],input[type=date]{width:100%;padding:8px 10px;border:1px solid var(--border);
+    border-radius:8px;font-size:13px;font-family:inherit;background:#fbfcfe;}
+  .checkrow{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;}
+  details{margin-top:16px;border-top:1px dashed var(--border);padding-top:14px;}
+  summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;}
+  .hint{font-size:11px;color:var(--sub);margin-top:6px;}
+  button#run{margin-top:18px;width:100%;padding:12px;border:none;border-radius:10px;
+    background:var(--red);color:#fff;font-size:14px;font-weight:700;cursor:pointer;}
+  button#run:disabled{background:#f3a9a3;cursor:default;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+  .kcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;
+    text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .kcard .lbl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;}
+  .kcard .val{font-size:18px;font-weight:700;}
+  .kcard .sub{font-size:10px;color:var(--sub);margin-top:2px;}
+  .chart-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;}
+  .chart-box h3{font-size:13px;margin:0 0 10px;color:var(--muted);}
+  canvas{max-height:340px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);}
+  th:first-child,td:first-child{text-align:left;}
+  th{color:var(--sub);font-weight:600;font-size:11px;text-transform:uppercase;}
+  #error{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#b91c1c;padding:12px 16px;
+    border-radius:10px;margin-bottom:16px;font-size:13px;}
+  #results{display:none;}
+  .disclaimer{font-size:12px;color:var(--muted);line-height:1.7;}
+  .footer-btn{margin-top:10px;padding:9px 16px;border:1px solid var(--border);border-radius:8px;
+    background:#fff;font-size:12px;cursor:pointer;}
+  #loading{display:none;text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📉 나스닥 하락 대응 레버리지 전환 백테스트</h1>
+  <div class="caption">QQQ 100% 보유 → QQQ(나스닥100) 직전 고점 대비 하락폭에 따라 QLD·TQQQ로 단계적·비가역적 전환</div>
+
+  <div class="panel">
+    <h2>⚙️ 설정</h2>
+    <div class="grid">
+      <div><label>초기 시드 (원)</label><input type="number" id="seed_krw" value="600000000" step="10000000"></div>
+      <div><label>시작일</label><input type="date" id="start" value="2019-01-01"></div>
+      <div><label>종료일</label><input type="date" id="end"></div>
+      <div><label>수수료/슬리피지 (%)</label><input type="number" id="fee" value="0.1" step="0.05" min="0" max="1"></div>
+    </div>
+    <div class="checkrow"><input type="checkbox" id="fx" checked><label style="margin:0;text-transform:none;font-size:13px;color:var(--text);">실제 USD/KRW 환율 변동 반영</label></div>
+
+    <details>
+      <summary>🎯 하락률 전환 기준 (고급)</summary>
+      <div class="grid" style="margin-top:12px;">
+        <div><label>1차: QLD 전환 하락률 (%)</label><input type="number" id="th1" value="10" min="1" max="90"></div>
+        <div><label>2차: TQQQ 전환 하락률 (%)</label><input type="number" id="th2" value="15" min="1" max="95"></div>
+        <div><label>3차: TQQQ 잔여물량 전환 하락률 (%)</label><input type="number" id="th3" value="20" min="1" max="98"></div>
+        <div><label>4차: QLD→TQQQ 전량 전환 하락률 (%)</label><input type="number" id="th4" value="30" min="1" max="99"></div>
+        <div><label>1차 전환 비중 - QLD (%)</label><input type="number" id="w1" value="30" min="1" max="98"></div>
+        <div><label>2차 전환 비중 - TQQQ (%)</label><input type="number" id="w2" value="30" min="1" max="98"></div>
+      </div>
+      <div class="hint" id="w3hint">3차(나머지) 전환 비중: <b>40%</b> (자동 계산 = 100 − 30 − 30)</div>
+    </details>
+
+    <button id="run">백테스트 실행</button>
+  </div>
+
+  <div id="error"></div>
+  <div id="loading">시세 데이터를 불러와 백테스트를 실행하는 중입니다… (최초 요청은 다소 걸릴 수 있습니다)</div>
+
+  <div id="results">
+    <div class="cards" id="cards"></div>
+
+    <div class="chart-box"><h3>평가금액 추이 (KRW)</h3><canvas id="chartEquity"></canvas></div>
+    <div class="chart-box"><h3>QQQ 고점 대비 하락률 (%)</h3><canvas id="chartDD"></canvas></div>
+    <div class="chart-box"><h3>자산 배분 비중 추이 (%)</h3><canvas id="chartAlloc"></canvas></div>
+
+    <div class="chart-box">
+      <h3>📋 전환 이벤트 내역</h3>
+      <div id="eventsWrap"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>⚠️ 백테스트 가정 및 유의사항</h3>
+      <div class="disclaimer">
+        - 하락률은 <b>QQQ 종가</b>의 직전 고점 대비 하락폭을 기준으로 계산합니다 (나스닥종합지수·나스닥100 지수가 아님).<br>
+        - 전환은 <b>비가역적(래칫)</b>입니다: 한 번 전환된 비중은 시장이 반등해도 QQQ로 되돌아가지 않습니다.<br>
+        - QQQ/QLD/TQQQ 가격은 배당 재투자를 반영한 수정종가를 사용합니다.<br>
+        - 세금은 반영되지 않았습니다. 실제 매매 시 양도소득세 등을 고려해야 합니다.<br>
+        - QLD/TQQQ는 일별 리밸런싱 레버리지 상품으로, 변동성이 큰 구간에서는 변동성 끌림(volatility decay)으로 인해 기초지수 배수 성과와 괴리가 커질 수 있습니다.<br>
+        - 과거 성과이며 미래 수익을 보장하지 않습니다.
+      </div>
+      <button class="footer-btn" id="csvBtn">일별 백테스트 결과 CSV 다운로드</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+$('end').value = new Date().toISOString().slice(0,10);
+
+let charts = {};
+let lastData = null;
+
+function syncW3(){
+  const w1 = Number($('w1').value)||0, w2 = Number($('w2').value)||0;
+  $('w3hint').innerHTML = `3차(나머지) 전환 비중: <b>${100-w1-w2}%</b> (자동 계산 = 100 − ${w1} − ${w2})`;
+}
+['w1','w2'].forEach(id => $(id).addEventListener('input', syncW3));
+
+function fmtKRW(v){ return new Intl.NumberFormat('ko-KR').format(Math.round(v)) + '원'; }
+function fmtPct(v){ return (v===null||v===undefined) ? '-' : (v*100).toFixed(1) + '%'; }
+
+function destroyCharts(){
+  Object.values(charts).forEach(c => c && c.destroy());
+  charts = {};
+}
+
+function renderCards(data){
+  const s = data.metrics.strategy, b = data.metrics.benchmark;
+  const finalStrat = data.strategy.value_krw[data.strategy.value_krw.length-1];
+  const finalBench = data.benchmark.value_krw[data.benchmark.value_krw.length-1];
+  const cards = [
+    ['최종 평가금액', fmtKRW(finalStrat), `QQQ100%: ${fmtKRW(finalBench)}`],
+    ['총 수익률', fmtPct(s.total_return), `QQQ100%: ${fmtPct(b.total_return)}`],
+    ['CAGR', fmtPct(s.cagr), `QQQ100%: ${fmtPct(b.cagr)}`],
+    ['MDD', fmtPct(s.mdd), `QQQ100%: ${fmtPct(b.mdd)}`],
+    ['샤프비율', s.sharpe===null?'-':s.sharpe.toFixed(2), `QQQ100%: ${b.sharpe===null?'-':b.sharpe.toFixed(2)}`],
+  ];
+  $('cards').innerHTML = cards.map(([lbl,val,sub]) =>
+    `<div class="kcard"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`
+  ).join('');
+}
+
+function renderCharts(data){
+  destroyCharts();
+  const labels = data.dates;
+
+  charts.equity = new Chart($('chartEquity'), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label:'전략 (단계적 전환)', data:data.strategy.value_krw, borderColor:'#dc2626', backgroundColor:'transparent', borderWidth:2, pointRadius:0 },
+      { label:'QQQ 100% 보유', data:data.benchmark.value_krw, borderColor:'#2563eb', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], pointRadius:0 },
+    ]},
+    options: { animation:false, interaction:{mode:'index',intersect:false}, scales:{ x:{ticks:{maxTicksLimit:10}}, y:{ticks:{callback:v=>Number(v).toLocaleString('ko-KR')}} } }
+  });
+
+  const th = data.thresholds;
+  const constLine = (v,n) => ({ label:`-${v}%`, data:labels.map(()=>-v), borderColor:n, borderWidth:1, borderDash:[5,4], pointRadius:0 });
+  charts.dd = new Chart($('chartDD'), {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'QQQ 하락률', data:data.strategy.qqq_dd.map(v=>-v*100), borderColor:'#64748b', backgroundColor:'rgba(100,116,139,.12)', fill:true, borderWidth:1.5, pointRadius:0 },
+      constLine(th.th1,'#f59e0b'), constLine(th.th2,'#f97316'), constLine(th.th3,'#ef4444'), constLine(th.th4,'#991b1b'),
+    ]},
+    options:{ animation:false, interaction:{mode:'index',intersect:false}, scales:{ x:{ticks:{maxTicksLimit:10}} } }
+  });
+
+  charts.alloc = new Chart($('chartAlloc'), {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'QQQ', data:data.strategy.w_QQQ.map(v=>v*100), borderColor:'#93c5fd', backgroundColor:'#93c5fd', fill:true, stack:'w', borderWidth:1, pointRadius:0 },
+      { label:'QLD', data:data.strategy.w_QLD.map(v=>v*100), borderColor:'#fbbf24', backgroundColor:'#fbbf24', fill:true, stack:'w', borderWidth:1, pointRadius:0 },
+      { label:'TQQQ', data:data.strategy.w_TQQQ.map(v=>v*100), borderColor:'#f87171', backgroundColor:'#f87171', fill:true, stack:'w', borderWidth:1, pointRadius:0 },
+    ]},
+    options:{ animation:false, interaction:{mode:'index',intersect:false}, scales:{ x:{ticks:{maxTicksLimit:10}}, y:{stacked:true,min:0,max:100} } }
+  });
+}
+
+function renderEvents(data){
+  if(!data.events.length){
+    $('eventsWrap').innerHTML = '<p style="font-size:13px;color:var(--muted);">설정한 기간 동안 전환 기준을 충족한 이벤트가 없습니다.</p>';
+    return;
+  }
+  const rows = data.events.map(e => `
+    <tr>
+      <td style="text-align:left;">${e.date}</td>
+      <td>${(e.drawdown*100).toFixed(1)}%</td>
+      <td>${e.w_QQQ.toFixed(0)}% / ${e.w_QLD.toFixed(0)}% / ${e.w_TQQQ.toFixed(0)}%</td>
+      <td>$${Math.round(e.value_usd).toLocaleString('en-US')}</td>
+      <td>$${e.fee_usd.toFixed(1)}</td>
+    </tr>`).join('');
+  $('eventsWrap').innerHTML = `
+    <table>
+      <thead><tr><th>날짜</th><th>하락률</th><th>QQQ/QLD/TQQQ 비중</th><th>평가금액(USD)</th><th>수수료(USD)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;">누적 전환 수수료/슬리피지: 약 ${Math.round(data.total_fee_usd).toLocaleString('en-US')} USD</div>
+  `;
+}
+
+function downloadCSV(){
+  if(!lastData) return;
+  const d = lastData;
+  const header = ['date','qqq_drawdown','w_QQQ','w_QLD','w_TQQQ','strategy_value_krw','benchmark_value_krw'];
+  const lines = [header.join(',')];
+  for(let i=0;i<d.dates.length;i++){
+    lines.push([d.dates[i], d.strategy.qqq_dd[i], d.strategy.w_QQQ[i], d.strategy.w_QLD[i], d.strategy.w_TQQQ[i],
+      d.strategy.value_krw[i], d.benchmark.value_krw[i]].join(','));
+  }
+  const blob = new Blob(["﻿"+lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'nasdaq_dip_leverage_backtest.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+$('csvBtn').addEventListener('click', downloadCSV);
+
+async function runBacktest(){
+  const params = new URLSearchParams({
+    seed_krw: $('seed_krw').value,
+    start: $('start').value,
+    end: $('end').value,
+    th1: $('th1').value, th2: $('th2').value, th3: $('th3').value, th4: $('th4').value,
+    w1: $('w1').value, w2: $('w2').value,
+    fx: $('fx').checked ? '1' : '0',
+    fee: $('fee').value,
+  });
+
+  $('error').style.display = 'none';
+  $('results').style.display = 'none';
+  $('loading').style.display = 'block';
+  $('run').disabled = true;
+
+  try {
+    const res = await fetch('/api/backtest?' + params.toString());
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error || `요청 실패 (HTTP ${res.status})`); }
+    lastData = data;
+    renderCards(data);
+    renderCharts(data);
+    renderEvents(data);
+    $('results').style.display = 'block';
+  } catch(err) {
+    $('error').textContent = '⚠️ ' + err.message;
+    $('error').style.display = 'block';
+  } finally {
+    $('loading').style.display = 'none';
+    $('run').disabled = false;
+  }
+}
+$('run').addEventListener('click', runBacktest);
+</script>
+</body>
+</html>
