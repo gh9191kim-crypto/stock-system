@@ -1,13 +1,19 @@
 """
-지금 이 순간 QQQ 기준으로 전략A/B 진입 조건이 어떤 상태인지 확인하는 스크립트.
+지금 이 순간 QQQ 기준으로 단계적 전환(래칫)·전략A·전략B 진입 조건이 어떤
+상태인지 확인하는 스크립트.
 
-api/compare.py 의 조건식(하락률·RSI·VIX, 매물대 돌파)을 그대로 사용해 "지금 얼마면
-들어가는지", "지금 조건이 충족됐는지"를 알려준다. 매도(청산) 조건은 다루지 않는다 —
-이미 보유 중이 아니라 신규 진입을 고민하는 상황을 가정한다.
+api/compare.py 의 조건식을 그대로 사용해 "지금 얼마면 들어가는지/전환되는지",
+"지금 조건이 충족됐는지"를 알려준다. 매도(청산) 조건은 다루지 않는다 — 이미
+보유 중이 아니라 신규 진입/전환을 고민하는 상황을 가정한다.
+
+단계적 전환(래칫) 전략은 "고점 대비 오늘의 하락률"만으로 상태가 결정된다
+(과거에 얼마나 깊이 빠졌었는지는 상관없이, 처음 시작하는 사람은 오늘 시점의
+하락률 구간에 해당하는 단계로 바로 시작하면 된다).
 
 사용법:
     pip install yfinance pandas numpy
     python3 live_signal_check.py
+    python3 live_signal_check.py --seed-krw 600000000 --th1 10 --th2 15 --th3 20 --th4 30
     python3 live_signal_check.py --dd-th 10 --rsi-th 30 --vix-th 20
     python3 live_signal_check.py --rebound-pct 5 --pullback-pct 3 --breakout-buffer 0.5
 """
@@ -22,9 +28,16 @@ import pandas as pd  # noqa: E402
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="QQQ 현재가 기준 전략A/B 진입 신호 체크")
+    p = argparse.ArgumentParser(description="QQQ 현재가 기준 단계적 전환(래칫)·전략A/B 진입 신호 체크")
     p.add_argument("--history-start", type=str, default="2019-01-01",
                     help="고점(전고점)을 계산할 기준 시작일")
+    p.add_argument("--seed-krw", type=float, default=600_000_000, help="단계적 전환 전략용 시드(원)")
+    p.add_argument("--th1", type=float, default=10.0, help="1차 QLD 전환 하락률(%%)")
+    p.add_argument("--th2", type=float, default=15.0, help="2차 TQQQ 전환 하락률(%%)")
+    p.add_argument("--th3", type=float, default=20.0, help="3차 잔여 TQQQ 전환 하락률(%%)")
+    p.add_argument("--th4", type=float, default=30.0, help="4차 전량 TQQQ 전환 하락률(%%)")
+    p.add_argument("--w1", type=float, default=30.0, help="1차 비중 QLD(%%)")
+    p.add_argument("--w2", type=float, default=30.0, help="2차 비중 TQQQ(%%)")
     p.add_argument("--dd-th", type=float, default=10.0, help="전략A 진입 하락률 기준(%%)")
     p.add_argument("--rsi-th", type=float, default=30.0, help="전략A 진입 RSI 이하 기준")
     p.add_argument("--vix-th", type=float, default=20.0, help="전략A 진입 VIX 이상 기준")
@@ -100,6 +113,43 @@ def main():
         print(f"BULZ 현재가        : ${last['BULZ']:.2f}")
     else:
         print("BULZ 현재가        : 데이터 없음")
+
+    # ── 단계적 전환 (래칫) ──────────────────────────────────────────────
+    th = {1: args.th1 / 100, 2: args.th2 / 100, 3: args.th3 / 100, 4: args.th4 / 100}
+    w1, w2 = args.w1 / 100, args.w2 / 100
+    target_states = engine.ratchet_target_weights(w1, w2)
+
+    state = 0
+    for s in (4, 3, 2, 1):
+        if dd >= th[s]:
+            state = s
+            break
+    target = target_states[state]
+
+    print("\n" + "-" * 60)
+    print("단계적 전환 (QQQ → QLD → TQQQ, 비가역)")
+    print("-" * 60)
+    print(f"  오늘 하락률 기준 시작 단계 : 단계 {state}")
+    print(f"  목표 배분                 : QQQ {target['QQQ']*100:.0f}% / "
+          f"QLD {target['QLD']*100:.0f}% / TQQQ {target['TQQQ']*100:.0f}%")
+    print(f"  {args.seed_krw:,.0f}원 기준 실제 금액      : "
+          f"QQQ {args.seed_krw*target['QQQ']:,.0f}원 / "
+          f"QLD {args.seed_krw*target['QLD']:,.0f}원 / "
+          f"TQQQ {args.seed_krw*target['TQQQ']:,.0f}원")
+    print("  단계별 트리거 가격:")
+    for s in (1, 2, 3, 4):
+        price = peak * (1 - th[s])
+        mark = "이미 도달" if state >= s else "대기"
+        print(f"    단계{s} (-{th[s]*100:.0f}%) ${price:.2f}  [{mark}]")
+    if state < 4:
+        next_s = state + 1
+        print(f"  => 지금 시작한다면 단계 {state}로 진입하고, QQQ가 ${peak*(1-th[next_s]):.2f} "
+              f"이하로 떨어지면 단계 {next_s}로 전환하면 됩니다.")
+    else:
+        print("  => 이미 -30% 이상 하락 구간이므로 TQQQ 100%가 목표 배분입니다.")
+    print("  ※ 이 전략은 '오늘 하락률'만으로 시작 단계가 정해집니다 (과거에 얼마나 깊이")
+    print("    빠졌었는지는 신규 진입자와 무관). 일단 진입한 뒤에는 반등해도 절대 되돌리지")
+    print("    않고, 표에서 아직 '대기'인 단계까지만 추가로 전환하면 됩니다.")
 
     # ── 전략 A ──────────────────────────────────────────────────────────
     dd_th = args.dd_th / 100
