@@ -7,13 +7,15 @@ GET /api/compare?seed_krw=...&start=2019-01-01&end=2026-07-31&...
 
 전략 A (신호 기반): QQQ 고점대비 하락률 >= dd_th AND RSI(14) <= rsi_th
                     AND VIX >= vix_th  ->  TQQQ 또는 BULZ 전액 진입
-                    매도: 주봉 종가가 down_weeks(기본 2주) 연속 하락 확정 시 QQQ로 전량 복귀
 전략 B (매물대 돌파): 고점대비 하락률 >= dd_th 로 하락 국면 시작
                      -> 저점 대비 rebound_pct 이상 반등하면 반등고점(매물대) 추적 시작
                      -> 반등고점 대비 pullback_pct 이상 눌림목이 나오면 매물대 '확정'
                      -> 확정된 매물대를 breakout_buffer 만큼 상향 돌파하면 TQQQ/BULZ 진입
                      (돌파 전 저점을 재이탈하면 하락 국면으로 리셋)
-                     매도 규칙은 전략 A와 동일 (주봉 2주 연속 하락)
+매도 규칙 (A/B 공통, 2단계): 매수 직후에는 RSI(14)가 rsi_exit_th(기본 60) 이상으로
+                    올라가기 전까지는 매도 신호를 무시하고 보유를 유지한다. RSI가
+                    rsi_exit_th 이상에 도달한 뒤부터는 주봉 종가가 down_weeks
+                    (기본 2주) 연속 하락 확정 시 QQQ로 전량 복귀한다.
 두 전략 모두 TQQQ / BULZ 버전을 각각 별도로 계산해 총 4개 시리즈를 만들고,
 기존 래칫 전략(QQQ->QLD->TQQQ 단계적 비가역 전환) 및 QQQ 100% 단순보유와 함께 반환한다.
 """
@@ -82,13 +84,14 @@ def fx_series_for(df: pd.DataFrame, apply_fx: bool) -> pd.Series:
 
 # ── 전략 A: RSI/VIX/하락률 신호 진입 ──────────────────────────────────────
 def run_signal_strategy(df, capital_krw, leverage_col, dd_th, rsi_th, vix_th,
-                         exit_days, apply_fx, fee_rate):
+                         exit_days, rsi_exit_arm_th, apply_fx, fee_rate):
     fx_series = fx_series_for(df, apply_fx)
     fx0 = fx_series.iloc[0]
     capital_usd = capital_krw / fx0
     shares = {"QQQ": capital_usd / df["QQQ"].iloc[0], "LEV": 0.0}
     peak = df["QQQ"].iloc[0]
     in_position = False
+    armed = False  # 매수 후 RSI가 rsi_exit_arm_th 이상 도달했는지 (도달 전에는 매도 신호 무시)
     records, events = [], []
     total_fee = 0.0
 
@@ -97,17 +100,23 @@ def run_signal_strategy(df, capital_krw, leverage_col, dd_th, rsi_th, vix_th,
         peak = max(peak, qqq)
         dd = (peak - qqq) / peak
         lev_px = row[leverage_col]
+        rsi = row["RSI"]
 
-        if in_position and dt in exit_days:
-            value = shares["QQQ"] * qqq + shares["LEV"] * lev_px
-            fee = value * fee_rate
-            value -= fee
-            total_fee += fee
-            shares = {"QQQ": value / qqq, "LEV": 0.0}
-            events.append({"date": dt.date().isoformat(), "type": "SELL",
-                            "reason": "주봉 2주 연속 하락", "value_usd": value})
-            in_position = False
-        elif (not in_position) and dd >= dd_th and pd.notna(row["RSI"]) and row["RSI"] <= rsi_th \
+        if in_position:
+            if not armed and pd.notna(rsi) and rsi >= rsi_exit_arm_th:
+                armed = True
+            if armed and dt in exit_days:
+                value = shares["QQQ"] * qqq + shares["LEV"] * lev_px
+                fee = value * fee_rate
+                value -= fee
+                total_fee += fee
+                shares = {"QQQ": value / qqq, "LEV": 0.0}
+                events.append({"date": dt.date().isoformat(), "type": "SELL",
+                                "reason": f"RSI {rsi_exit_arm_th:.0f} 이상 도달 후 주봉 2주 연속 하락",
+                                "value_usd": value})
+                in_position = False
+                armed = False
+        elif dd >= dd_th and pd.notna(rsi) and rsi <= rsi_th \
                 and row["VIX"] >= vix_th and pd.notna(lev_px):
             value = shares["QQQ"] * qqq
             fee = value * fee_rate
@@ -115,9 +124,10 @@ def run_signal_strategy(df, capital_krw, leverage_col, dd_th, rsi_th, vix_th,
             total_fee += fee
             shares = {"QQQ": 0.0, "LEV": value / lev_px}
             events.append({"date": dt.date().isoformat(), "type": "BUY",
-                            "reason": f"QQQ -{dd*100:.1f}%, RSI {row['RSI']:.1f}, VIX {row['VIX']:.1f}",
+                            "reason": f"QQQ -{dd*100:.1f}%, RSI {rsi:.1f}, VIX {row['VIX']:.1f}",
                             "value_usd": value})
             in_position = True
+            armed = False
 
         value_usd = shares["QQQ"] * qqq + (shares["LEV"] * lev_px if pd.notna(lev_px) else 0.0)
         fx = fx_series.loc[dt]
@@ -128,13 +138,14 @@ def run_signal_strategy(df, capital_krw, leverage_col, dd_th, rsi_th, vix_th,
 
 # ── 전략 B: 하락 저점 후 반등고점(매물대) 돌파 ────────────────────────────
 def run_breakout_strategy(df, capital_krw, leverage_col, dd_th, rebound_pct, pullback_pct,
-                           breakout_buffer, exit_days, apply_fx, fee_rate):
+                           breakout_buffer, exit_days, rsi_exit_arm_th, apply_fx, fee_rate):
     fx_series = fx_series_for(df, apply_fx)
     fx0 = fx_series.iloc[0]
     capital_usd = capital_krw / fx0
     shares = {"QQQ": capital_usd / df["QQQ"].iloc[0], "LEV": 0.0}
     peak = df["QQQ"].iloc[0]
     in_position = False
+    armed = False  # 매수 후 RSI가 rsi_exit_arm_th 이상 도달했는지 (도달 전에는 매도 신호 무시)
     phase = "IDLE"
     episode_low = None
     swing_high = None
@@ -146,17 +157,22 @@ def run_breakout_strategy(df, capital_krw, leverage_col, dd_th, rebound_pct, pul
         peak = max(peak, qqq)
         dd = (peak - qqq) / peak
         lev_px = row[leverage_col]
+        rsi = row["RSI"]
 
         if in_position:
-            if dt in exit_days:
+            if not armed and pd.notna(rsi) and rsi >= rsi_exit_arm_th:
+                armed = True
+            if armed and dt in exit_days:
                 value = shares["QQQ"] * qqq + shares["LEV"] * lev_px
                 fee = value * fee_rate
                 value -= fee
                 total_fee += fee
                 shares = {"QQQ": value / qqq, "LEV": 0.0}
                 events.append({"date": dt.date().isoformat(), "type": "SELL",
-                                "reason": "주봉 2주 연속 하락", "value_usd": value})
+                                "reason": f"RSI {rsi_exit_arm_th:.0f} 이상 도달 후 주봉 2주 연속 하락",
+                                "value_usd": value})
                 in_position = False
+                armed = False
                 phase, episode_low, swing_high = "IDLE", None, None
         else:
             if phase == "IDLE":
@@ -186,6 +202,7 @@ def run_breakout_strategy(df, capital_krw, leverage_col, dd_th, rebound_pct, pul
                                     "reason": f"매물대(${swing_high:.2f}) 상향돌파(${qqq:.2f})",
                                     "value_usd": value})
                     in_position = True
+                    armed = False
                     phase, episode_low, swing_high = "IDLE", None, None
 
         value_usd = shares["QQQ"] * qqq + (shares["LEV"] * lev_px if pd.notna(lev_px) else 0.0)
@@ -323,6 +340,7 @@ class handler(BaseHTTPRequestHandler):
             dd_th = qf("dd_th", 10) / 100
             rsi_th = qf("rsi_th", 30)
             vix_th = qf("vix_th", 20)
+            rsi_exit_th = qf("rsi_exit_th", 60)
 
             rebound_pct = qf("rebound_pct", 5) / 100
             pullback_pct = qf("pullback_pct", 3) / 100
@@ -348,18 +366,20 @@ class handler(BaseHTTPRequestHandler):
             bench = run_benchmark(df, seed_krw, apply_fx)
             series["benchmark_qqq"] = bench
 
-            r, e, f = run_signal_strategy(df, seed_krw, "TQQQ", dd_th, rsi_th, vix_th, exit_days, apply_fx, fee_rate)
+            r, e, f = run_signal_strategy(df, seed_krw, "TQQQ", dd_th, rsi_th, vix_th, exit_days,
+                                           rsi_exit_th, apply_fx, fee_rate)
             series["signal_tqqq"], events["signal_tqqq"], fees["signal_tqqq"] = r, e, f
 
-            r, e, f = run_signal_strategy(df, seed_krw, "BULZ", dd_th, rsi_th, vix_th, exit_days, apply_fx, fee_rate)
+            r, e, f = run_signal_strategy(df, seed_krw, "BULZ", dd_th, rsi_th, vix_th, exit_days,
+                                           rsi_exit_th, apply_fx, fee_rate)
             series["signal_bulz"], events["signal_bulz"], fees["signal_bulz"] = r, e, f
 
             r, e, f = run_breakout_strategy(df, seed_krw, "TQQQ", dd_th, rebound_pct, pullback_pct,
-                                             breakout_buffer, exit_days, apply_fx, fee_rate)
+                                             breakout_buffer, exit_days, rsi_exit_th, apply_fx, fee_rate)
             series["breakout_tqqq"], events["breakout_tqqq"], fees["breakout_tqqq"] = r, e, f
 
             r, e, f = run_breakout_strategy(df, seed_krw, "BULZ", dd_th, rebound_pct, pullback_pct,
-                                             breakout_buffer, exit_days, apply_fx, fee_rate)
+                                             breakout_buffer, exit_days, rsi_exit_th, apply_fx, fee_rate)
             series["breakout_bulz"], events["breakout_bulz"], fees["breakout_bulz"] = r, e, f
 
             dates = [rec["date"] for rec in series["benchmark_qqq"]]
@@ -385,6 +405,7 @@ class handler(BaseHTTPRequestHandler):
                 "bulz_inception": bulz_inception,
                 "params": {
                     "dd_th": dd_th * 100, "rsi_th": rsi_th, "vix_th": vix_th, "down_weeks": down_weeks,
+                    "rsi_exit_th": rsi_exit_th,
                     "rebound_pct": rebound_pct * 100, "pullback_pct": pullback_pct * 100,
                     "breakout_buffer": breakout_buffer * 100,
                     "ratchet": {"th1": th["th1"] * 100, "th2": th["th2"] * 100, "th3": th["th3"] * 100,
