@@ -63,6 +63,8 @@ def fmt_pct(v):
 
 SERIES_META = [
     ("benchmark_qqq", "QQQ 100% 보유"),
+    ("buyhold_qld", "QLD 100% 매수후보유"),
+    ("buyhold_tqqq", "TQQQ 100% 매수후보유"),
     ("ratchet", "이전 전략 (단계적 전환)"),
     ("signal_tqqq", "전략A 신호진입 - TQQQ"),
     ("signal_bulz", "전략A 신호진입 - BULZ"),
@@ -118,6 +120,10 @@ def main():
 
     series["benchmark_qqq"] = engine.run_benchmark(df, args.seed_krw, apply_fx)
     events["benchmark_qqq"] = []
+    series["buyhold_qld"] = engine.run_buyhold(df, args.seed_krw, "QLD", apply_fx)
+    events["buyhold_qld"] = []
+    series["buyhold_tqqq"] = engine.run_buyhold(df, args.seed_krw, "TQQQ", apply_fx)
+    events["buyhold_tqqq"] = []
 
     r, e, _ = engine.run_signal_strategy(df, args.seed_krw, "TQQQ", dd_th, args.rsi_th, args.vix_th,
                                           exit_days, args.rsi_exit_th, apply_fx, fee_rate)

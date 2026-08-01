@@ -147,6 +147,8 @@ const $ = (id) => document.getElementById(id);
 
 const SERIES_META = [
   { key: 'benchmark_qqq', label: 'QQQ 100% 보유', color: '#2563eb', dash: [4,3] },
+  { key: 'buyhold_qld',   label: 'QLD 100% 매수후보유', color: '#0891b2', dash: [4,3] },
+  { key: 'buyhold_tqqq',  label: 'TQQQ 100% 매수후보유', color: '#a16207', dash: [4,3] },
   { key: 'ratchet',       label: '이전 전략 (단계적 전환)', color: '#7c3aed', dash: [] },
   { key: 'signal_tqqq',   label: '전략A 신호진입 - TQQQ', color: '#dc2626', dash: [] },
   { key: 'signal_bulz',   label: '전략A 신호진입 - BULZ', color: '#f97316', dash: [] },
@@ -264,6 +266,7 @@ function renderDisclaimer(data){
     ? `BULZ는 ${data.bulz_inception} 이전 데이터가 없어 그 이전에는 신호가 발생해도 BULZ 진입이 불가능하고 QQQ를 그대로 보유합니다.`
     : 'BULZ 데이터를 확인할 수 없습니다.';
   $('disclaimer').innerHTML = `
+    - <b>QLD/TQQQ 100% 매수후보유</b>는 하락 대응 없이 처음부터 끝까지 레버리지 상품만 들고 있었을 때의 결과입니다. 조정 없이 쭉 오르는 구간에서는 이 쪽이 신호 기반 전략보다 유리할 수 있지만, 큰 하락이 오면 그만큼 더 크게 다칩니다 — 나머지 전략들이 "언제 레버리지를 들고 언제 피하는지"로 무엇을 얻고 잃는지 비교하는 기준선입니다.<br>
     - 매도 규칙은 2단계입니다: 매수 후 <b>RSI(14)가 ${data.params.rsi_exit_th.toFixed(0)} 이상으로 오르기 전까지는 주봉 하락이 나와도 매도하지 않고 보유</b>하며, RSI가 그 값에 도달한 뒤부터 <b>주봉 ${data.params.down_weeks}주 연속 하락이 확정되면 QQQ로 복귀</b>합니다. 이 규칙 덕분에 매수 직후 바로 조정이 와도 성급하게 팔지 않지만, 하락장에서 RSI가 60까지 오르지 못하면 계속 보유하게 되어 낙폭이 커질 수 있습니다. 아래 거래 내역에서 매매 빈도와 보유 기간을 꼭 확인하세요.<br>
     - 전략 B(매물대 돌파)의 '매물대'는 <b>하락 저점 형성 → 저점대비 ${data.params.rebound_pct.toFixed(1)}% 이상 반등 → 반등고점대비 ${data.params.pullback_pct.toFixed(1)}% 눌림목으로 매물대 확정 → 그 고점을 ${data.params.breakout_buffer.toFixed(2)}% 상향 돌파 시 진입</b>하는 규칙으로 자동 판별한 것이며, 실제 트레이더가 보는 수급·거래량 기반 매물대와는 다를 수 있습니다.<br>
     - ${bulzNote}<br>

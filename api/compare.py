@@ -265,16 +265,23 @@ def run_ratchet_strategy(df, capital_krw, th, w, apply_fx, fee_rate):
     return records, events, total_fee
 
 
-def run_benchmark(df, capital_krw, apply_fx):
+def run_buyhold(df, capital_krw, ticker, apply_fx):
+    """ticker를 시작일에 전액 매수해 그대로 보유 (하락 대응 없이 단순 매수후보유).
+    QQQ/QLD/TQQQ 처럼 조회 구간 전체에 데이터가 있는 티커에만 사용한다 (BULZ처럼
+    중간에 상장한 티커를 넣으면 시작일 데이터가 없어 날짜 배열 길이가 달라진다)."""
     fx_series = fx_series_for(df, apply_fx)
     fx0 = fx_series.iloc[0]
     capital_usd = capital_krw / fx0
-    shares_qqq = capital_usd / df["QQQ"].iloc[0]
+    shares = capital_usd / df[ticker].iloc[0]
     records = []
     for dt, row in df.iterrows():
-        value_usd = shares_qqq * row["QQQ"]
+        value_usd = shares * row[ticker]
         records.append({"date": dt.date().isoformat(), "value_krw": value_usd * fx_series.loc[dt]})
     return records
+
+
+def run_benchmark(df, capital_krw, apply_fx):
+    return run_buyhold(df, capital_krw, "QQQ", apply_fx)
 
 
 def calc_metrics(dates, values):
@@ -365,6 +372,8 @@ class handler(BaseHTTPRequestHandler):
 
             bench = run_benchmark(df, seed_krw, apply_fx)
             series["benchmark_qqq"] = bench
+            series["buyhold_tqqq"] = run_buyhold(df, seed_krw, "TQQQ", apply_fx)
+            series["buyhold_qld"] = run_buyhold(df, seed_krw, "QLD", apply_fx)
 
             r, e, f = run_signal_strategy(df, seed_krw, "TQQQ", dd_th, rsi_th, vix_th, exit_days,
                                            rsi_exit_th, apply_fx, fee_rate)
