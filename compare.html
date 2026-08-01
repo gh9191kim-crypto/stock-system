@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>전략 비교 백테스트 — 신호 진입 vs 매물대 돌파 vs 단계적 전환</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --border:#e2e8f0; --text:#1e293b; --muted:#64748b; --sub:#94a3b8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+  h1{font-size:22px;margin:0 0 4px;}
+  .caption{color:var(--muted);font-size:13px;margin-bottom:10px;}
+  .nav{font-size:12px;margin-bottom:16px;}
+  .nav a{color:#2563eb;text-decoration:none;margin-right:14px;}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:20px;}
+  .panel h2{font-size:14px;margin:0 0 14px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+  label{display:block;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  input[type=number],input[type=date]{width:100%;padding:8px 10px;border:1px solid var(--border);
+    border-radius:8px;font-size:13px;font-family:inherit;background:#fbfcfe;}
+  .checkrow{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;}
+  details{margin-top:16px;border-top:1px dashed var(--border);padding-top:14px;}
+  summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;}
+  .subhead{font-size:12px;color:var(--text);font-weight:700;margin:12px 0 8px;}
+  button#run{margin-top:18px;width:100%;padding:12px;border:none;border-radius:10px;
+    background:#dc2626;color:#fff;font-size:14px;font-weight:700;cursor:pointer;}
+  button#run:disabled{background:#f3a9a3;cursor:default;}
+  .chart-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;}
+  .chart-box h3{font-size:13px;margin:0 0 10px;color:var(--muted);}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+  th:first-child,td:first-child{text-align:left;}
+  th{color:var(--sub);font-weight:600;font-size:11px;text-transform:uppercase;}
+  tr.hl td{font-weight:700;background:#fef2f2;}
+  .tablewrap{overflow-x:auto;}
+  #error{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#b91c1c;padding:12px 16px;
+    border-radius:10px;margin-bottom:16px;font-size:13px;}
+  #results{display:none;}
+  .disclaimer{font-size:12px;color:var(--muted);line-height:1.8;}
+  .warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:12px 16px;border-radius:10px;
+    font-size:12.5px;margin-bottom:14px;line-height:1.7;}
+  .footer-btn{margin-top:10px;padding:9px 16px;border:1px solid var(--border);border-radius:8px;
+    background:#fff;font-size:12px;cursor:pointer;}
+  #loading{display:none;text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+  .tabbtn{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:#fff;
+    font-size:12px;cursor:pointer;color:var(--muted);}
+  .tabbtn.active{background:#1e293b;color:#fff;border-color:#1e293b;}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  canvas{max-height:380px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><a href="/">← 단일 전략(단계적 전환) 백테스트</a></div>
+  <h1>⚔️ 전략 비교 백테스트</h1>
+  <div class="caption">이전 전략(QQQ→QLD→TQQQ 단계적 비가역 전환) vs 신호 기반 진입(RSI·VIX) vs 매물대 돌파 진입 — TQQQ·BULZ 각각 비교</div>
+
+  <div class="panel">
+    <h2>⚙️ 공통 설정</h2>
+    <div class="grid">
+      <div><label>초기 시드 (원)</label><input type="number" id="seed_krw" value="600000000" step="10000000"></div>
+      <div><label>시작일</label><input type="date" id="start" value="2019-01-01"></div>
+      <div><label>종료일</label><input type="date" id="end" value="2026-07-31"></div>
+      <div><label>수수료/슬리피지 (%)</label><input type="number" id="fee" value="0.1" step="0.05" min="0" max="1"></div>
+    </div>
+    <div class="checkrow"><input type="checkbox" id="fx" checked><label style="margin:0;text-transform:none;font-size:13px;color:var(--text);">실제 USD/KRW 환율 변동 반영</label></div>
+
+    <details>
+      <summary>🎯 전략 상세 조건 (고급)</summary>
+
+      <div class="subhead">공통 매도 규칙</div>
+      <div class="grid">
+        <div><label>주봉 연속 하락 매도 기준 (주)</label><input type="number" id="down_weeks" value="2" min="1" max="8"></div>
+      </div>
+
+      <div class="subhead">전략 A — 신호 기반 진입 (하락률+RSI+VIX)</div>
+      <div class="grid">
+        <div><label>QQQ 고점대비 하락률 (%)</label><input type="number" id="dd_th" value="10" min="1" max="80"></div>
+        <div><label>RSI(14) 이하</label><input type="number" id="rsi_th" value="30" min="1" max="99"></div>
+        <div><label>VIX 이상</label><input type="number" id="vix_th" value="20" min="1" max="99"></div>
+      </div>
+
+      <div class="subhead">전략 B — 매물대(반등고점) 돌파 진입</div>
+      <div class="grid">
+        <div><label>반등 확인 (저점대비 %)</label><input type="number" id="rebound_pct" value="5" min="1" max="50"></div>
+        <div><label>매물대 확정 눌림목 (%)</label><input type="number" id="pullback_pct" value="3" min="1" max="50"></div>
+        <div><label>돌파 확인 버퍼 (%)</label><input type="number" id="breakout_buffer" value="0.5" step="0.1" min="0" max="10"></div>
+      </div>
+
+      <div class="subhead">이전 전략 — 단계적 비가역 전환 (래칫)</div>
+      <div class="grid">
+        <div><label>1차 QLD 하락률(%)</label><input type="number" id="th1" value="10"></div>
+        <div><label>2차 TQQQ 하락률(%)</label><input type="number" id="th2" value="15"></div>
+        <div><label>3차 잔여 TQQQ 하락률(%)</label><input type="number" id="th3" value="20"></div>
+        <div><label>4차 전량 TQQQ 하락률(%)</label><input type="number" id="th4" value="30"></div>
+        <div><label>1차 비중 QLD(%)</label><input type="number" id="w1" value="30"></div>
+        <div><label>2차 비중 TQQQ(%)</label><input type="number" id="w2" value="30"></div>
+      </div>
+    </details>
+
+    <button id="run">비교 백테스트 실행</button>
+  </div>
+
+  <div id="error"></div>
+  <div id="loading">6개 전략을 동시에 계산 중입니다 (QQQ·QLD·TQQQ·BULZ·VIX·환율 시세 조회)… 최초 요청은 다소 걸릴 수 있습니다.</div>
+
+  <div id="results">
+    <div class="chart-box">
+      <h3>📊 전략별 최종 성과 비교</h3>
+      <div class="tablewrap"><table id="summaryTable"></table></div>
+    </div>
+
+    <div class="chart-box"><h3>평가금액 추이 (KRW, 6개 전략 동시 비교)</h3><canvas id="chartEquity"></canvas></div>
+
+    <div class="chart-box">
+      <h3>🗓️ 위기 국면별 비교 (COVID·2022 약세장·우크라이나 전쟁·관세·이란 분쟁)</h3>
+      <div class="warn">아래 구간 날짜는 일반적으로 알려진 사건 시점 기준 근사치입니다 (이 세션은 뉴스·시세 검증 API에 접근할 수 없어 정확한 저점/고점 날짜를 직접 확인하지 못했습니다). 구간 내 수익률·진입 여부는 실제 계산된 시세로 산출됩니다.</div>
+      <div class="tablewrap" id="eventWrap"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>📋 전략별 거래 내역</h3>
+      <div class="tabs" id="tradeTabs"></div>
+      <div class="tablewrap" id="tradeWrap"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>⚠️ 가정 및 유의사항</h3>
+      <div class="disclaimer" id="disclaimer"></div>
+      <button class="footer-btn" id="csvBtn">일별 결과 CSV 다운로드</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const SERIES_META = [
+  { key: 'benchmark_qqq', label: 'QQQ 100% 보유', color: '#2563eb', dash: [4,3] },
+  { key: 'ratchet',       label: '이전 전략 (단계적 전환)', color: '#7c3aed', dash: [] },
+  { key: 'signal_tqqq',   label: '전략A 신호진입 - TQQQ', color: '#dc2626', dash: [] },
+  { key: 'signal_bulz',   label: '전략A 신호진입 - BULZ', color: '#f97316', dash: [] },
+  { key: 'breakout_tqqq', label: '전략B 매물대돌파 - TQQQ', color: '#16a34a', dash: [] },
+  { key: 'breakout_bulz', label: '전략B 매물대돌파 - BULZ', color: '#0d9488', dash: [] },
+];
+
+let lastData = null;
+let equityChart = null;
+let activeTab = 'signal_tqqq';
+
+function fmtKRW(v){ return new Intl.NumberFormat('ko-KR').format(Math.round(v)) + '원'; }
+function fmtPct(v){ return (v===null||v===undefined) ? '-' : (v*100).toFixed(1) + '%'; }
+
+function renderSummary(data){
+  let html = '<thead><tr><th>전략</th><th>최종 평가금액</th><th>총 수익률</th><th>CAGR</th><th>MDD</th><th>변동성</th><th>샤프</th><th>매매횟수</th></tr></thead><tbody>';
+  SERIES_META.forEach(s => {
+    const m = data.metrics[s.key];
+    const vals = data.series[s.key];
+    const finalV = vals[vals.length-1];
+    const tradeCount = (data.events[s.key] || []).length;
+    const hl = s.key.startsWith('signal') || s.key.startsWith('breakout') ? 'hl' : '';
+    html += `<tr class="${hl}">
+      <td><span class="dot" style="background:${s.color}"></span>${s.label}</td>
+      <td>${fmtKRW(finalV)}</td>
+      <td>${fmtPct(m.total_return)}</td>
+      <td>${fmtPct(m.cagr)}</td>
+      <td>${fmtPct(m.mdd)}</td>
+      <td>${fmtPct(m.vol)}</td>
+      <td>${m.sharpe===null?'-':m.sharpe.toFixed(2)}</td>
+      <td>${tradeCount}</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  $('summaryTable').innerHTML = html;
+}
+
+function renderChart(data){
+  if(equityChart) equityChart.destroy();
+  const labels = data.dates;
+  const datasets = SERIES_META.map(s => ({
+    label: s.label, data: data.series[s.key], borderColor: s.color, backgroundColor: 'transparent',
+    borderWidth: s.key==='benchmark_qqq' ? 1.5 : 2, borderDash: s.dash, pointRadius: 0,
+  }));
+  equityChart = new Chart($('chartEquity'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: { animation:false, interaction:{mode:'index',intersect:false},
+      scales:{ x:{ticks:{maxTicksLimit:10}}, y:{ticks:{callback:v=>Number(v).toLocaleString('ko-KR')}} } }
+  });
+}
+
+function findValueNear(dates, values, targetDate, mode){
+  // mode 'first' -> first date >= target, 'last' -> last date <= target
+  let result = null;
+  if(mode === 'first'){
+    for(let i=0;i<dates.length;i++){ if(dates[i] >= targetDate){ result = values[i]; break; } }
+  } else {
+    for(let i=dates.length-1;i>=0;i--){ if(dates[i] <= targetDate){ result = values[i]; break; } }
+  }
+  return result;
+}
+
+function renderEvents(data){
+  const dates = data.dates;
+  let html = '<table><thead><tr><th>사건</th><th>기간</th>' +
+    SERIES_META.map(s=>`<th>${s.label}</th>`).join('') + '</tr></thead><tbody>';
+  data.event_windows.forEach(w => {
+    html += `<tr><td>${w.name}</td><td>${w.start} ~ ${w.end}</td>`;
+    SERIES_META.forEach(s => {
+      const startV = findValueNear(dates, data.series[s.key], w.start, 'first');
+      const endV = findValueNear(dates, data.series[s.key], w.end, 'last');
+      let cell = '-';
+      if(startV!=null && endV!=null){
+        const ret = (endV/startV - 1) * 100;
+        let entryMark = '';
+        const evs = data.events[s.key] || [];
+        const entered = evs.some(e => e.type==='BUY' && e.date >= w.start && e.date <= w.end);
+        if(entered) entryMark = ' 🔴진입';
+        cell = `${ret>=0?'+':''}${ret.toFixed(1)}%${entryMark}`;
+      }
+      html += `<td>${cell}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  $('eventWrap').innerHTML = html;
+  $('eventWrap').insertAdjacentHTML('beforeend', `<div style="font-size:11px;color:var(--sub);margin-top:8px;">🔴진입 = 해당 구간 중 해당 전략의 매수(BUY) 신호가 발생했음</div>`);
+}
+
+function renderTrades(data){
+  const tabKeys = ['ratchet','signal_tqqq','signal_bulz','breakout_tqqq','breakout_bulz'];
+  $('tradeTabs').innerHTML = tabKeys.map(k => {
+    const meta = SERIES_META.find(s=>s.key===k);
+    return `<button class="tabbtn ${k===activeTab?'active':''}" data-key="${k}">${meta.label} (${(data.events[k]||[]).length})</button>`;
+  }).join('');
+  document.querySelectorAll('.tabbtn').forEach(btn => {
+    btn.addEventListener('click', () => { activeTab = btn.dataset.key; renderTrades(data); });
+  });
+  const evs = data.events[activeTab] || [];
+  if(!evs.length){
+    $('tradeWrap').innerHTML = '<p style="font-size:13px;color:var(--muted);">해당 기간 동안 거래가 없습니다.</p>';
+    return;
+  }
+  let html = '<table><thead><tr><th>날짜</th><th>유형</th><th>사유</th><th>평가금액(USD)</th></tr></thead><tbody>';
+  evs.forEach(e => {
+    html += `<tr><td>${e.date}</td><td>${e.type}</td><td style="text-align:left;">${e.reason}</td><td>$${Math.round(e.value_usd).toLocaleString('en-US')}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  $('tradeWrap').innerHTML = html;
+}
+
+function renderDisclaimer(data){
+  const bulzNote = data.bulz_inception
+    ? `BULZ는 ${data.bulz_inception} 이전 데이터가 없어 그 이전에는 신호가 발생해도 BULZ 진입이 불가능하고 QQQ를 그대로 보유합니다.`
+    : 'BULZ 데이터를 확인할 수 없습니다.';
+  $('disclaimer').innerHTML = `
+    - 전략 A(신호 진입)는 <b>하락률·RSI·VIX 조건이 계속 충족되는 동안 "2주 연속 주봉 하락 매도 → 조건 재충족 시 즉시 재매수"가 반복될 수 있습니다.</b>
+      길게 이어지는 약세장에서는 이 휩쏘(짧은 매수-매도 반복)로 인해 수수료·타이밍 손실이 누적되어 성과가 크게 훼손될 수 있습니다 — 실제로 합성 데이터 테스트에서 이 현상이 확인되었습니다. 아래 거래 내역에서 매매 빈도를 꼭 확인하세요.<br>
+    - 전략 B(매물대 돌파)의 '매물대'는 <b>하락 저점 형성 → 저점대비 ${data.params.rebound_pct.toFixed(1)}% 이상 반등 → 반등고점대비 ${data.params.pullback_pct.toFixed(1)}% 눌림목으로 매물대 확정 → 그 고점을 ${data.params.breakout_buffer.toFixed(2)}% 상향 돌파 시 진입</b>하는 규칙으로 자동 판별한 것이며, 실제 트레이더가 보는 수급·거래량 기반 매물대와는 다를 수 있습니다.<br>
+    - ${bulzNote}<br>
+    - 하락률은 QQQ 종가의 직전 고점 대비, RSI(14)·VIX는 종가 기준입니다. 위기 국면 구간 날짜는 일반 지식 기반 근사치이며 실제 저점/고점과 다를 수 있습니다.<br>
+    - QQQ/QLD/TQQQ/BULZ 가격은 배당 재투자를 반영한 수정종가를 사용하며, 세금은 반영되지 않았습니다.<br>
+    - TQQQ/BULZ는 일별 리밸런싱 레버리지 상품으로 변동성 끌림(volatility decay)이 발생할 수 있습니다.<br>
+    - 과거 성과이며 미래 수익을 보장하지 않습니다.
+  `;
+}
+
+function downloadCSV(){
+  if(!lastData) return;
+  const d = lastData;
+  const keys = SERIES_META.map(s=>s.key);
+  const header = ['date', ...keys];
+  const lines = [header.join(',')];
+  for(let i=0;i<d.dates.length;i++){
+    lines.push([d.dates[i], ...keys.map(k=>d.series[k][i])].join(','));
+  }
+  const blob = new Blob(["﻿"+lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'strategy_compare_backtest.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+$('csvBtn').addEventListener('click', downloadCSV);
+
+async function runCompare(){
+  const params = new URLSearchParams({
+    seed_krw: $('seed_krw').value, start: $('start').value, end: $('end').value,
+    fx: $('fx').checked ? '1':'0', fee: $('fee').value, down_weeks: $('down_weeks').value,
+    dd_th: $('dd_th').value, rsi_th: $('rsi_th').value, vix_th: $('vix_th').value,
+    rebound_pct: $('rebound_pct').value, pullback_pct: $('pullback_pct').value, breakout_buffer: $('breakout_buffer').value,
+    th1: $('th1').value, th2: $('th2').value, th3: $('th3').value, th4: $('th4').value,
+    w1: $('w1').value, w2: $('w2').value,
+  });
+
+  $('error').style.display='none'; $('results').style.display='none'; $('loading').style.display='block';
+  $('run').disabled = true;
+
+  try {
+    const res = await fetch('/api/compare?' + params.toString());
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error || `요청 실패 (HTTP ${res.status})`); }
+    lastData = data;
+    renderSummary(data);
+    renderChart(data);
+    renderEvents(data);
+    renderTrades(data);
+    renderDisclaimer(data);
+    $('results').style.display = 'block';
+  } catch(err) {
+    $('error').textContent = '⚠️ ' + err.message;
+    $('error').style.display = 'block';
+  } finally {
+    $('loading').style.display = 'none';
+    $('run').disabled = false;
+  }
+}
+$('run').addEventListener('click', runCompare);
+</script>
+</body>
+</html>
