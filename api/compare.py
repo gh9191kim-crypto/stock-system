@@ -322,6 +322,72 @@ def run_hybrid_ratchet_strategy(df, capital_krw, base_pct, th, w, apply_fx, fee_
     return records, events, total_fee
 
 
+def hybrid_capped_target_weights(base_pct, w1, w2, max_lev):
+    """hybrid_target_weights의 일반화 버전. base_pct는 항상 QLD로 고정 보유하는
+    비중이고, max_lev는 최악의 경우(4단계, 전량 TQQQ 국면)에도 절대 넘지 않는
+    총 레버리지(QLD+TQQQ) 상한이다. (1-max_lev)만큼은 어떤 하락에도 영원히
+    QQQ로 남아 안전판 역할을 한다. max_lev=1.0이면 hybrid_target_weights와 동일."""
+    r = 1 - base_pct
+    escalatable = max(0.0, min(r, max_lev - base_pct))
+    frozen = r - escalatable
+    return [
+        {"QQQ": frozen + escalatable, "QLD": base_pct, "TQQQ": 0.0},
+        {"QQQ": frozen + escalatable * (1 - w1), "QLD": base_pct + escalatable * w1, "TQQQ": 0.0},
+        {"QQQ": frozen + escalatable * (1 - w1 - w2), "QLD": base_pct + escalatable * w1,
+         "TQQQ": escalatable * w2},
+        {"QQQ": frozen, "QLD": base_pct + escalatable * w1, "TQQQ": escalatable * (1 - w1)},
+        {"QQQ": frozen, "QLD": 0.0, "TQQQ": base_pct + escalatable},
+    ]
+
+
+def run_hybrid_capped_strategy(df, capital_krw, base_pct, max_lev, th, w, apply_fx, fee_rate):
+    """run_hybrid_ratchet_strategy와 동일한 로직이지만, 그리드 서치에서 수천 번
+    반복 호출되는 것을 감안해 itertuples + 위치 기반 환율 조회로 최적화했다."""
+    assets = ("QQQ", "QLD", "TQQQ")
+    fx_series = fx_series_for(df, apply_fx)
+    fx0 = fx_series.iloc[0]
+    fx_values = fx_series.to_numpy()
+    capital_usd = capital_krw / fx0
+    target_states = hybrid_capped_target_weights(base_pct, w["w1"], w["w2"], max_lev)
+    init_w = target_states[0]
+    shares = {a: (capital_usd * init_w[a]) / df[a].iloc[0] if init_w[a] > 0 else 0.0 for a in assets}
+    peak = df["QQQ"].iloc[0]
+    state = 0
+    records, events = [], []
+    total_fee = 0.0
+    th1, th2, th3, th4 = th["th1"], th["th2"], th["th3"], th["th4"]
+
+    for i, row in enumerate(df.itertuples(index=True)):
+        dt = row.Index
+        prow = {"QQQ": row.QQQ, "QLD": row.QLD, "TQQQ": row.TQQQ}
+        peak = max(peak, prow["QQQ"])
+        dd = (peak - prow["QQQ"]) / peak
+        new_state = state
+        if dd >= th4:
+            new_state = 4
+        elif dd >= th3:
+            new_state = 3
+        elif dd >= th2:
+            new_state = 2
+        elif dd >= th1:
+            new_state = 1
+        if new_state > state:
+            target_w = target_states[new_state]
+            value = sum(shares[a] * prow[a] for a in assets)
+            turnover = sum(abs(value * target_w[a] - shares[a] * prow[a]) for a in assets) / 2
+            fee = turnover * fee_rate
+            value -= fee
+            total_fee += fee
+            shares = {a: (value * target_w[a]) / prow[a] if target_w[a] > 0 else 0.0 for a in assets}
+            events.append({"date": dt.date().isoformat(), "type": "REBALANCE",
+                            "reason": f"QQQ -{dd*100:.1f}% (단계 {new_state})", "value_usd": value})
+            state = new_state
+        value_usd = shares["QQQ"] * prow["QQQ"] + shares["QLD"] * prow["QLD"] + shares["TQQQ"] * prow["TQQQ"]
+        records.append({"date": dt.date().isoformat(), "value_krw": value_usd * fx_values[i]})
+
+    return records, events, total_fee
+
+
 def run_buyhold(df, capital_krw, ticker, apply_fx):
     """ticker를 시작일에 전액 매수해 그대로 보유 (하락 대응 없이 단순 매수후보유).
     QQQ/QLD/TQQQ 처럼 조회 구간 전체에 데이터가 있는 티커에만 사용한다 (BULZ처럼

@@ -1,9 +1,14 @@
 """
-전략C(기본 레버리지 슬리브 + 나머지 래칫) 그리드 서치.
+전략C(기본 레버리지 슬리브 + 나머지 래칫, 레버리지 상한 포함) 그리드 서치.
 
 "조정 없는 상승장에서도 레버리지를 놓치지 않으면서, 최대낙폭(MDD)은 -50%를
 넘기지 않는 조합"을 찾기 위해 여러 파라미터 조합을 한 번에 백테스트하고,
 MDD -50% 이내인 조합 중 수익률이 가장 높은 순으로 정렬해서 보여준다.
+
+base_pct(항상 QLD로 고정 보유하는 기본 비중) 외에 max_lev(최악의 하락에도
+절대 넘지 않는 총 레버리지 상한)를 추가로 탐색한다. 예를 들어 max_lev=40이면
+아무리 깊게 하락해도 60%는 QQQ로 영구히 남아 안전판 역할을 해서, 예전처럼
+결국 100% TQQQ까지 가는 조합보다 MDD를 훨씬 낮게 억제할 수 있다.
 
 사용법:
     pip install yfinance pandas numpy
@@ -35,12 +40,18 @@ def parse_args():
     p.add_argument("--out", type=str, default="grid_search_result.csv")
 
     # 그리드 범위 (기본값도 조정 가능하게 열어둠)
-    p.add_argument("--base-grid", type=str, default="0,10,20,30,40,50",
+    p.add_argument("--base-grid", type=str, default="0,10,20,30",
                     help="기본 레버리지 비중(%%) 후보, 쉼표구분")
+    p.add_argument("--maxlev-grid", type=str, default="20,30,40,50,60,80,100",
+                    help="최악의 경우(4단계)에도 넘지 않는 총 레버리지 상한(%%) 후보. "
+                         "100이면 상한 없음(기존 방식)")
+    p.add_argument("--th1-grid", type=str, default="8,10,12", help="1차 QLD 전환 하락률(%%) 후보")
+    p.add_argument("--th2-grid", type=str, default="13,15,18", help="2차 TQQQ 전환 하락률(%%) 후보")
+    p.add_argument("--th3-grid", type=str, default="18,20,25", help="3차 잔여 전환 하락률(%%) 후보")
     p.add_argument("--th4-grid", type=str, default="25,30,35",
-                    help="4차(전량 TQQQ) 전환 하락률(%%) 후보")
-    p.add_argument("--w1-grid", type=str, default="20,30,40", help="1차 비중 QLD(%%) 후보")
-    p.add_argument("--w2-grid", type=str, default="20,30,40", help="2차 비중 TQQQ(%%) 후보")
+                    help="4차(레버리지 상한 도달) 전환 하락률(%%) 후보")
+    p.add_argument("--w1-grid", type=str, default="20,30", help="1차 비중 QLD(%%) 후보")
+    p.add_argument("--w2-grid", type=str, default="20,30", help="2차 비중 TQQQ(%%) 후보")
     return p.parse_args()
 
 
@@ -67,6 +78,10 @@ def main():
     mdd_limit = -abs(args.mdd_limit) / 100  # 예: -0.50
 
     base_grid = fnum(args.base_grid)
+    maxlev_grid = fnum(args.maxlev_grid)
+    th1_grid = fnum(args.th1_grid)
+    th2_grid = fnum(args.th2_grid)
+    th3_grid = fnum(args.th3_grid)
     th4_grid = fnum(args.th4_grid)
     w1_grid = fnum(args.w1_grid)
     w2_grid = fnum(args.w2_grid)
@@ -83,22 +98,28 @@ def main():
         sys.exit(1)
     print(f"데이터 {len(df)}거래일 확보.\n")
 
-    combos = list(itertools.product(base_grid, w1_grid, w2_grid, th4_grid))
-    print(f"총 {len(combos)}개 조합 백테스트 실행 중...")
+    combos = list(itertools.product(base_grid, maxlev_grid, w1_grid, w2_grid,
+                                     th1_grid, th2_grid, th3_grid, th4_grid))
+    print(f"총 {len(combos)}개 조합 후보 중 유효 조합 백테스트 실행 중... (시간이 걸릴 수 있습니다)")
 
     results = []
-    for base, w1, w2, th4 in combos:
+    for base, maxlev, w1, w2, th1, th2, th3, th4 in combos:
         if w1 + w2 >= 100:
             continue  # 3차 단계 QQQ 비중이 음수가 되는 불가능한 조합 제외
-        th = {"th1": 0.10, "th2": 0.15, "th3": 0.20, "th4": th4 / 100}
+        if base > maxlev:
+            continue  # 기본 비중이 상한을 넘는 모순 조합 제외
+        if not (th1 < th2 < th3 < th4):
+            continue  # 하락률 임계값은 반드시 오름차순이어야 함
+        th = {"th1": th1 / 100, "th2": th2 / 100, "th3": th3 / 100, "th4": th4 / 100}
         w = {"w1": w1 / 100, "w2": w2 / 100}
-        r, events, _ = engine.run_hybrid_ratchet_strategy(
-            df, args.seed_krw, base / 100, th, w, apply_fx, fee_rate)
+        r, events, _ = engine.run_hybrid_capped_strategy(
+            df, args.seed_krw, base / 100, maxlev / 100, th, w, apply_fx, fee_rate)
         dates = [rec["date"] for rec in r]
         values = [rec["value_krw"] for rec in r]
         m = engine.calc_metrics(dates, values)
         results.append({
-            "base_pct": base, "w1": w1, "w2": w2, "th4": th4,
+            "base_pct": base, "max_lev": maxlev, "w1": w1, "w2": w2,
+            "th1": th1, "th2": th2, "th3": th3, "th4": th4,
             "final_krw": values[-1], "total_return": m["total_return"],
             "cagr": m["cagr"], "mdd": m["mdd"], "sharpe": m["sharpe"],
             "trades": len(events),
@@ -124,7 +145,8 @@ def main():
         show["mdd"] = show["mdd"].map(lambda v: f"{v*100:.1f}%")
         show["sharpe"] = show["sharpe"].map(lambda v: "-" if v is None else f"{v:.2f}")
         print(show.rename(columns={
-            "base_pct": "기본QLD%", "w1": "1차비중%", "w2": "2차비중%", "th4": "4차임계%",
+            "base_pct": "기본QLD%", "max_lev": "상한%", "w1": "1차비중%", "w2": "2차비중%",
+            "th1": "1차임계%", "th2": "2차임계%", "th3": "3차임계%", "th4": "4차임계%",
             "final_krw": "최종금액", "total_return": "총수익률", "cagr": "CAGR",
             "mdd": "MDD", "sharpe": "샤프", "trades": "전환횟수",
         }).to_string(index=False))
@@ -132,8 +154,10 @@ def main():
         best = passed.iloc[0]
         print("\n" + "-" * 90)
         print("최고 수익 조합 (MDD 제한 내):")
-        print(f"  기본 QLD 비중 {best['base_pct']:.0f}% / 1차전환 {best['w1']:.0f}% / "
-              f"2차전환 {best['w2']:.0f}% / 4차임계 -{best['th4']:.0f}%")
+        print(f"  기본 QLD 비중 {best['base_pct']:.0f}% / 레버리지 상한 {best['max_lev']:.0f}%")
+        print(f"  하락률 임계값: 1차 -{best['th1']:.0f}% / 2차 -{best['th2']:.0f}% / "
+              f"3차 -{best['th3']:.0f}% / 4차 -{best['th4']:.0f}%")
+        print(f"  전환 비중: 1차 {best['w1']:.0f}% / 2차 {best['w2']:.0f}%")
         print(f"  최종금액 {best['final_krw']:,.0f}원 / 총수익률 {best['total_return']*100:.1f}% / "
               f"CAGR {best['cagr']*100:.1f}% / MDD {best['mdd']*100:.1f}% / 전환 {int(best['trades'])}회")
 
@@ -162,10 +186,12 @@ def main():
 
     # ── 위기 국면별 손실률 비교 (최고 조합 vs 기존 래칫 vs 벤치마크) ──────
     if not passed.empty:
-        best_th = {"th1": 0.10, "th2": 0.15, "th3": 0.20, "th4": best["th4"] / 100}
+        best_th = {"th1": best["th1"] / 100, "th2": best["th2"] / 100,
+                   "th3": best["th3"] / 100, "th4": best["th4"] / 100}
         best_w = {"w1": best["w1"] / 100, "w2": best["w2"] / 100}
-        r_best, e_best, _ = engine.run_hybrid_ratchet_strategy(
-            df, args.seed_krw, best["base_pct"] / 100, best_th, best_w, apply_fx, fee_rate)
+        r_best, e_best, _ = engine.run_hybrid_capped_strategy(
+            df, args.seed_krw, best["base_pct"] / 100, best["max_lev"] / 100,
+            best_th, best_w, apply_fx, fee_rate)
         vals_best = [x["value_krw"] for x in r_best]
 
         series_for_events = [
@@ -173,7 +199,7 @@ def main():
             ("QLD 100% 매수후보유", [x["value_krw"] for x in bench_qld], []),
             ("TQQQ 100% 매수후보유", [x["value_krw"] for x in bench_tqqq], []),
             ("기존 래칫(base 0%)", vals0, e0),
-            (f"최고조합(QLD{best['base_pct']:.0f}%+래칫)", vals_best, e_best),
+            (f"최고조합(기본{best['base_pct']:.0f}%+상한{best['max_lev']:.0f}%)", vals_best, e_best),
         ]
 
         print("\n" + "=" * 90)
